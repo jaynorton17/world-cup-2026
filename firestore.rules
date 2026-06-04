@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isJuniorAdmin() {
+      return request.auth != null && request.auth.token.juniorAdmin == true;
+    }
+
+    function isHostFeeAllowed() {
+      return isAdmin() || isJuniorAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /worldCupPredictions/{matchKey} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null
+        && (request.resource.data.actual == resource.data.actual
+            || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /leagues/{leagueId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid
+        && (request.resource.data.hostFeePercent == 0
+            || request.resource.data.hostFeePercent == null
+            || request.resource.data.hostFeePercent == 0.0
+            || isHostFeeAllowed());
+      allow update: if request.auth != null
+        && resource.data.createdBy == request.auth.uid
+        && (request.resource.data.hostFeePercent == resource.data.hostFeePercent
+            || isHostFeeAllowed());
+      allow delete: if request.auth != null
+        && (resource.data.createdBy == request.auth.uid
+            || request.auth.uid in resource.data.admins);
+    }
+
+    match /chats/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /leagues/{leagueId}/messages/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
