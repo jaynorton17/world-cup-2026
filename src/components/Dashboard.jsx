@@ -255,7 +255,9 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
       .filter((m) => m.stage === 'group' && !isMatchDeadlinePassed(m.matchDate) && m.actual?.homeScore == null)
       .sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate))
       .slice(0, 3);
-    return { uid: viewPlayerUid, name, pts, predCount, totalGroup, nextThree };
+    const pp = data.podiumPrediction;
+    const podium = pp ? (pp.final || pp.initial || null) : null;
+    return { uid: viewPlayerUid, name, pts, predCount, totalGroup, nextThree, podium };
   }, [viewPlayerUid, usersMap, user, matches]);
 
   return (
@@ -342,6 +344,24 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
             <div className="dash-player-stats">
               <span className="dash-player-stat">{viewPlayer.predCount} of {viewPlayer.totalGroup} predicted</span>
             </div>
+            {viewPlayer.podium && (
+              <div className="dash-player-podium">
+                <div className="dash-player-podium-title">Podium Picks</div>
+                {[
+                  { key: 'first', icon: '\uD83E\uDD47', label: 'Winner', team: viewPlayer.podium.first },
+                  { key: 'second', icon: '\uD83E\uDD48', label: 'Runner-up', team: viewPlayer.podium.second },
+                  { key: 'third', icon: '\uD83E\uDD49', label: 'Third', team: viewPlayer.podium.third },
+                ].map((p) => (
+                  <div key={p.key} className="dash-player-podium-row">
+                    <span className="dash-player-podium-medal">{p.icon}</span>
+                    <span className="dash-player-podium-team">{p.team}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!viewPlayer.podium && (
+              <div className="dash-player-podium dash-player-podium--empty">Podium picks not set</div>
+            )}
             {viewPlayer.nextThree.length > 0 && (
               <div className="dash-player-next">
                 <div className="dash-player-next-title">Next 3 Games</div>

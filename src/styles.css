@@ -2237,6 +2237,44 @@ button:disabled {
   font-style: italic;
 }
 
+.dash-player-podium {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dash-player-podium-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8aa0c0;
+}
+
+.dash-player-podium-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.dash-player-podium-medal {
+  font-size: 0.8rem;
+  width: 18px;
+  text-align: center;
+}
+
+.dash-player-podium-team {
+  font-weight: 600;
+  color: #f0f4ff;
+}
+
+.dash-player-podium--empty {
+  font-size: 0.68rem;
+  color: #6a8090;
+  font-style: italic;
+}
+
 .dash-podium-mini {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 10px;
