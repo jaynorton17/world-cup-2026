@@ -2127,10 +2127,114 @@ button:disabled {
   white-space: nowrap;
 }
 
+.dash-mini-lb-name--link {
+  color: #5bc0ff;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.dash-mini-lb-name--link:hover {
+  color: #3ddc84;
+  text-decoration: underline;
+}
+
 .dash-mini-lb-pts {
   font-weight: 700;
   color: #f0c040;
   font-size: 0.75rem;
+}
+
+/* ===== PLAYER PROFILE ===== */
+.dash-player-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-player-back {
+  background: none;
+  border: none;
+  color: #5bc0ff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.12s;
+}
+
+.dash-player-back:hover {
+  color: #3ddc84;
+}
+
+.dash-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-player-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f0f4ff;
+}
+
+.dash-player-pts {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #f0c040;
+}
+
+.dash-player-stats {
+  font-size: 0.7rem;
+  color: #8aa0c0;
+}
+
+.dash-player-next {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dash-player-next-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8aa0c0;
+}
+
+.dash-player-next-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  font-size: 0.68rem;
+}
+
+.dash-player-next-teams {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dash-player-next-vs {
+  opacity: 0.35;
+  font-size: 0.6rem;
+}
+
+.dash-player-pred-score {
+  font-weight: 700;
+  color: #f0c040;
+}
+
+.dash-player-no-pred {
+  color: #6a8090;
+  font-style: italic;
 }
 
 .dash-podium-mini {

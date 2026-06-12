@@ -100,6 +100,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
   const selectedLeagueId = allLeagues[leagueIdx]?.id || MASTER_LEAGUE_ID;
 
   const [leaguePaused, setLeaguePaused] = useState(false);
+  const [viewPlayerUid, setViewPlayerUid] = useState(null);
 
   useTickingInterval(() => {
     setLeagueIdx((prev) => (prev + 1) % allLeagues.length);
@@ -243,6 +244,20 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
 
   const pointsTotal = userPoints[pointsPlayerUid] || 0;
 
+  const viewPlayer = useMemo(() => {
+    if (!viewPlayerUid) return null;
+    const data = usersMap[viewPlayerUid];
+    if (!data) return null;
+    const name = data.displayName || (viewPlayerUid === user?.uid && user?.displayName) || 'Player';
+    const pts = userPoints[viewPlayerUid] || 0;
+    const predCount = matches.filter((m) => m.stage === 'group' && m.predictions?.[viewPlayerUid]?.homeScore != null).length;
+    const nextThree = matches
+      .filter((m) => m.stage === 'group' && !isMatchDeadlinePassed(m.matchDate) && m.actual?.homeScore == null)
+      .sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate))
+      .slice(0, 3);
+    return { uid: viewPlayerUid, name, pts, predCount, totalGroup, nextThree };
+  }, [viewPlayerUid, usersMap, user, matches]);
+
   return (
     <section className="panel dash-panel">
       <h1 className="dash-title">{user?.displayName?.split(' ')[0] || 'Player'}'s Dashboard</h1>
@@ -314,52 +329,101 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
           </span>
           <button type="button" className="dash-league-arrow" onClick={() => cycleLeague(1)} aria-label="Next league">{'\u25B6'}</button>
         </div>
-        <div className="dash-mini-lb">
-          {miniLeaderboard.map((entry) => {
-            const isMe = entry.uid === user?.uid;
-            const pos = leaderboard.indexOf(entry) + 1;
-            return (
-              <div key={entry.uid} className={`dash-mini-lb-row${isMe ? ' dash-mini-lb-row--me' : ''}`}>
-                <span className="dash-mini-lb-pos">{pos}</span>
-                <span className="dash-mini-lb-name">{entry.name}</span>
-                <span className="dash-mini-lb-pts">{entry.points}</span>
-              </div>
-            );
-          })}
-          {miniLeaderboard.length === 0 && (
-            <div className="dash-empty">No league data yet</div>
-          )}
-        </div>
-        {userDoc?.podiumPrediction && (() => {
-          const pp = userDoc.podiumPrediction;
-          const picks = pp.final || pp.initial || pp;
-          const isFinalized = !!pp.final;
-          const isTripleEligible = isFinalized && pp.initial && pp.final
-            && pp.initial.first === pp.final.first
-            && pp.initial.second === pp.final.second
-            && pp.initial.third === pp.final.third;
-          return (
-            <div className="dash-podium-mini">
-              <div className="dash-podium-mini-title">My Podium Picks</div>
-              {[
-                { key: 'first', icon: '\uD83E\uDD47', team: picks.first, pts: PODIUM_POINTS.first },
-                { key: 'second', icon: '\uD83E\uDD48', team: picks.second, pts: PODIUM_POINTS.second },
-                { key: 'third', icon: '\uD83E\uDD49', team: picks.third, pts: PODIUM_POINTS.third },
-              ].map((p) => (
-                <div key={p.key} className="dash-podium-mini-row">
-                  <span className="dash-podium-mini-medal">{p.icon}</span>
-                  <span className="dash-podium-mini-team">{p.team}</span>
-                  <span className="dash-podium-mini-pts">+{isTripleEligible ? p.pts * PODIUM_TRIPLE_MULTIPLIER : p.pts}</span>
-                </div>
-              ))}
+
+        {viewPlayer ? (
+          <div className="dash-player-profile">
+            <button type="button" className="dash-player-back" onClick={() => setViewPlayerUid(null)}>
+              {'\u25C0'} Back to league
+            </button>
+            <div className="dash-player-header">
+              <span className="dash-player-name">{viewPlayer.name}</span>
+              <span className="dash-player-pts">{viewPlayer.pts} pts</span>
             </div>
-          );
-        })()}
-        {(!userDoc?.podiumPrediction) && (
-          <div className="dash-podium-mini dash-podium-mini--empty" onClick={onOpenPodium} style={{ cursor: 'pointer' }}>
-            <div className="dash-podium-mini-title">Podium Picks</div>
-            <div className="dash-podium-mini-empty-text">Set your podium picks {'\u2192'}</div>
+            <div className="dash-player-stats">
+              <span className="dash-player-stat">{viewPlayer.predCount} of {viewPlayer.totalGroup} predicted</span>
+            </div>
+            {viewPlayer.nextThree.length > 0 && (
+              <div className="dash-player-next">
+                <div className="dash-player-next-title">Next 3 Games</div>
+                {viewPlayer.nextThree.map((m) => {
+                  const pred = m.predictions?.[viewPlayerUid];
+                  return (
+                    <div key={m.matchKey} className="dash-player-next-row">
+                      <div className="dash-player-next-teams">
+                        <FlagImg team={m.homeTeam} size={14} />
+                        <span>{shortTeam(m.homeTeam)}</span>
+                        <span className="dash-player-next-vs">vs</span>
+                        <span>{shortTeam(m.awayTeam)}</span>
+                        <FlagImg team={m.awayTeam} size={14} />
+                      </div>
+                      <div className="dash-player-next-pred">
+                        {pred ? (
+                          <span className="dash-player-pred-score">{pred.homeScore} - {pred.awayScore}</span>
+                        ) : (
+                          <span className="dash-player-no-pred">No pred</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
+        ) : (
+          <>
+            <div className="dash-mini-lb">
+              {miniLeaderboard.map((entry) => {
+                const isMe = entry.uid === user?.uid;
+                const pos = leaderboard.indexOf(entry) + 1;
+                return (
+                  <div key={entry.uid} className={`dash-mini-lb-row${isMe ? ' dash-mini-lb-row--me' : ''}`}>
+                    <span className="dash-mini-lb-pos">{pos}</span>
+                    <span
+                      className="dash-mini-lb-name dash-mini-lb-name--link"
+                      onClick={() => setViewPlayerUid(entry.uid)}
+                    >
+                      {entry.name}
+                    </span>
+                    <span className="dash-mini-lb-pts">{entry.points}</span>
+                  </div>
+                );
+              })}
+              {miniLeaderboard.length === 0 && (
+                <div className="dash-empty">No league data yet</div>
+              )}
+            </div>
+            {userDoc?.podiumPrediction && (() => {
+              const pp = userDoc.podiumPrediction;
+              const picks = pp.final || pp.initial || pp;
+              const isFinalized = !!pp.final;
+              const isTripleEligible = isFinalized && pp.initial && pp.final
+                && pp.initial.first === pp.final.first
+                && pp.initial.second === pp.final.second
+                && pp.initial.third === pp.final.third;
+              return (
+                <div className="dash-podium-mini">
+                  <div className="dash-podium-mini-title">My Podium Picks</div>
+                  {[
+                    { key: 'first', icon: '\uD83E\uDD47', team: picks.first, pts: PODIUM_POINTS.first },
+                    { key: 'second', icon: '\uD83E\uDD48', team: picks.second, pts: PODIUM_POINTS.second },
+                    { key: 'third', icon: '\uD83E\uDD49', team: picks.third, pts: PODIUM_POINTS.third },
+                  ].map((p) => (
+                    <div key={p.key} className="dash-podium-mini-row">
+                      <span className="dash-podium-mini-medal">{p.icon}</span>
+                      <span className="dash-podium-mini-team">{p.team}</span>
+                      <span className="dash-podium-mini-pts">+{isTripleEligible ? p.pts * PODIUM_TRIPLE_MULTIPLIER : p.pts}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+            {(!userDoc?.podiumPrediction) && (
+              <div className="dash-podium-mini dash-podium-mini--empty" onClick={onOpenPodium} style={{ cursor: 'pointer' }}>
+                <div className="dash-podium-mini-title">Podium Picks</div>
+                <div className="dash-podium-mini-empty-text">Set your podium picks {'\u2192'}</div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
