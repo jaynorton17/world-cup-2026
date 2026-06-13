@@ -3,7 +3,7 @@ import { updateProfile } from 'firebase/auth';
 import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { firebaseAuth } from '../lib/firebase.js';
 import { checkDisplayName } from '../utils/leaguesData.js';
-import { PODIUM_POINTS, PODIUM_TRIPLE_MULTIPLIER } from '../utils/worldCupData.js';
+import { PODIUM_POINTS } from '../utils/worldCupData.js';
 
 export default function MyProfile({ user, firestore, userDoc, onOpenPodium }) {
   const email = user?.email || '';
@@ -64,13 +64,7 @@ export default function MyProfile({ user, firestore, userDoc, onOpenPodium }) {
     setNameError('');
   };
 
-  const pp = userDoc?.podiumPrediction;
-  const picks = pp ? (pp.final || pp) : null;
-  const isFinalized = !!pp?.final;
-  const isTripleEligible = isFinalized && pp.initial && pp.final
-    && pp.initial.first === pp.final.first
-    && pp.initial.second === pp.final.second
-    && pp.initial.third === pp.final.third;
+  const picks = userDoc?.podiumPrediction || null;
 
   return (
     <div className="wc-panel" style={{ maxWidth: 500, margin: '0 auto' }}>
@@ -128,17 +122,14 @@ export default function MyProfile({ user, firestore, userDoc, onOpenPodium }) {
             <div key={p.key} className="dash-podium-mini-row">
               <span className="dash-podium-mini-medal">{p.icon}</span>
               <span className="dash-podium-mini-team">{p.team}</span>
-              <span className="dash-podium-mini-pts">{isTripleEligible ? p.pts * PODIUM_TRIPLE_MULTIPLIER : p.pts}</span>
+              <span className="dash-podium-mini-pts">{p.pts}</span>
             </div>
           ))}
-          <button type="button" className="wc-btn wc-btn--small" style={{ marginTop: 8 }} onClick={onOpenPodium}>
-            Update Picks
-          </button>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+        <div className="dash-podium-mini--empty" style={{ textAlign: 'center', padding: '20px 0' }}>
           <p style={{ color: '#8aa0c0', marginBottom: 12 }}>No podium picks set yet.</p>
-          <button type="button" className="wc-btn" onClick={onOpenPodium}>
+          <button type="button" className="dash-next-match-pred-btn" onClick={onOpenPodium}>
             Set Podium Picks
           </button>
         </div>

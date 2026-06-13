@@ -1,6 +1,6 @@
-import { Component, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, Component } from 'react';
 import { createPortal } from 'react-dom';
-import { onSnapshot, collection, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { onSnapshot, collection, doc, limit, query, updateDoc, serverTimestamp } from 'firebase/firestore';
 import {
   WORLD_CUP_2026_MATCHES,
   STAGE_LABELS,
@@ -9,26 +9,27 @@ import {
   isMatchDeadlinePassed,
   getMatchDeadline,
   formatMatchKickoff,
+  getLocalDateStr,
+  isDateInRound,
+  formatDateShort,
+  formatDateMonthDay,
   parseVenue,
-} from '../utils/worldCupData';
-import { PODIUM_POINTS, PODIUM_TRIPLE_MULTIPLIER, PODIUM_LOCK_DATE, WILD_CARD_MULTIPLIER } from '../utils/worldCupData';
-import { getTeamData } from '../utils/teamData.js';
-import MatchDetailModal from './MatchDetailModal';
+} from '../utils/worldCupData.js';
+import { PODIUM_POINTS, GROUP_STAGE_END_DATE, WILD_CARD_MULTIPLIER } from '../utils/worldCupData.js';
+import MatchDetailModal from './MatchDetailModal.jsx';
+import useTickingInterval from '../hooks/useTickingInterval.js';
+
+const USERS_QUERY_LIMIT = 500;
 
 function shortTeam(name) {
   if (name === 'Bosnia and Herzegovina') return 'Bosnia';
-  if (name === "C\u00F4te d'Ivoire") return "C\u00F4te d'Ivoire";
-  if (name === 'Korea Republic') return 'S. Korea';
-  if (name === 'IR Iran') return 'Iran';
-  if (name === 'Cabo Verde') return 'C. Verde';
-  if (name === 'Congo DR') return 'Congo';
+  if (name === 'Ivory Coast' || name === "C\u00F4te d'Ivoire") return 'Ivory Coast';
+  if (name === 'South Korea' || name === 'Korea Republic') return 'S. Korea';
+  if (name === 'Iran' || name === 'IR Iran') return 'Iran';
+  if (name === 'Cape Verde' || name === 'Cabo Verde') return 'C. Verde';
+  if (name === 'DR Congo' || name === 'Congo DR') return 'DR Congo';
   if (name === 'Saudi Arabia') return 'Saudi Ar.';
-  if (name === 'Netherlands') return 'Netherlands';
-  if (name === 'Switzerland') return 'Switzerland';
-  if (name === 'Czechia') return 'Czechia';
-  if (name === 'T\u00FCrkiye') return 'T\u00FCrkiye';
-  if (name === 'New Zealand') return 'N. Zealand';
-  if (name.length > 9) return name.slice(0, 8) + '\u2026';
+  if (name === 'United States' || name === 'USA') return 'USA';
   return name;
 }
 
@@ -41,7 +42,7 @@ const matchStatusIcon = (m) => {
 function FlagImg({ team, size = 20 }) {
   const url = getFlagUrl(team);
   if (!url) return <span style={{ width: size, height: size, display: 'inline-block', background: 'rgba(255,255,255,0.06)', borderRadius: 3, verticalAlign: 'middle' }} />;
-  return <img src={url} alt={team} style={{ width: size, height: size, borderRadius: 3, verticalAlign: 'middle' }} />;
+  return <img src={url} alt={team} style={{ width: size, height: size * 0.75, borderRadius: 3, verticalAlign: 'middle' }} onError={(e) => { e.target.style.display = 'none' }} />;
 }
 
 function DonutChart({ predicted, outstanding }) {
@@ -123,7 +124,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
 
   useEffect(() => {
     if (!firestore) return;
-    const unsub = onSnapshot(collection(firestore, 'users'), (snap) => {
+    const unsub = onSnapshot(query(collection(firestore, 'users'), limit(USERS_QUERY_LIMIT)), (snap) => {
       const map = {};
       snap.docs.forEach((d) => { map[d.id] = d.data(); });
       setUsersMap(map);
@@ -145,7 +146,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
     matchDocs.forEach((d) => { map[d.matchKey] = d; });
     return WORLD_CUP_2026_MATCHES.map((m) => {
       const doc = map[m.matchKey] || {};
-      return { ...m, ...doc, id: doc.id || m.matchKey, predictions: doc.predictions || {}, actual: doc.actual || { homeScore: null, awayScore: null }, points: doc.points || {} };
+      return { ...m, id: doc.id || m.matchKey, predictions: doc.predictions || {}, actual: doc.actual || { homeScore: null, awayScore: null }, points: doc.points || {} };
     });
   }, [matchDocs]);
 
@@ -166,47 +167,43 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
     const r = getCurrentRound();
     return r ? `round${r.round}` : 'all';
   });
+  const [mobileView, setMobileView] = useState('outstanding');
 
   const groupPredicted = useMemo(() => predicted.filter((m) => m.stage === 'group'), [predicted]);
   const knockoutPredicted = useMemo(() => predicted.filter((m) => m.stage !== 'group'), [predicted]);
 
   const wildCardData = useMemo(() => podiumUserDoc ?? userDoc, [podiumUserDoc, userDoc]);
 
+  const currentRound = getCurrentRound();
+
   const wildCardBanner = useMemo(() => {
-    const round = getCurrentRound();
-    if (!round || !wildCardData) return null;
-    const wildCardKey = 'round' + round.round;
+    if (!currentRound || !wildCardData) return null;
+    const wildCardKey = 'round' + currentRound.round;
     if (wildCardData.wildCards?.[wildCardKey]) return null;
-    return { round: round.round, label: round.label };
-  }, [wildCardData]);
+    return { round: currentRound.round, label: currentRound.label };
+  }, [wildCardData, currentRound]);
 
   const wildCardActivated = useMemo(() => {
-    const round = getCurrentRound();
-    if (!round || !wildCardData) return null;
-    const wcKey = 'round' + round.round;
+    if (!currentRound || !wildCardData) return null;
+    const wcKey = 'round' + currentRound.round;
     const wcData = wildCardData.wildCards?.[wcKey];
     if (!wcData) return null;
-    return { round: round.round, label: round.label, day: wcData.day };
-  }, [wildCardData]);
+    return { round: currentRound.round, label: currentRound.label, day: wcData.day };
+  }, [wildCardData, currentRound]);
 
-  const hasWCRound = !!getCurrentRound();
+  const hasWCRound = !!currentRound;
 
   const [podiumCountdown, setPodiumCountdown] = useState('');
 
-  useEffect(() => {
-    const tick = () => {
-      const diff = new Date(PODIUM_LOCK_DATE).getTime() - Date.now();
-      if (diff <= 0) { setPodiumCountdown(''); return; }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setPodiumCountdown(`${d}d ${h}h ${m}m ${s}s`);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
+  useTickingInterval(() => {
+    const diff = new Date(GROUP_STAGE_END_DATE).getTime() - Date.now();
+    if (diff <= 0) { setPodiumCountdown(''); return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    setPodiumCountdown(`${d}d ${h}h ${m}m ${s}s`);
+  }, 1000);
 
   const otherPodiumData = useMemo(() => {
     const otherUsers = Object.entries(usersMap).filter(([uid]) => uid !== user?.uid && usersMap[uid]?.podiumPrediction);
@@ -226,24 +223,31 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
     };
   }, [usersMap, user]);
 
-  const pp = podiumUserDoc?.podiumPrediction;
-  const podiumPicks = pp ? (pp.final || pp) : null;
-  const podiumFinalized = !!pp?.final;
-  const podiumTriple = podiumFinalized && pp.initial && pp.final
-    && pp.initial.first === pp.final.first
-    && pp.initial.second === pp.final.second
-    && pp.initial.third === pp.final.third;
+  const podiumPicks = podiumUserDoc?.podiumPrediction || null;
 
   const nextActualMatch = useMemo(() => {
     return matches
-      .filter((m) => m.stage === 'group' && !isMatchDeadlinePassed(m.matchDate) && m.actual?.homeScore == null)
+      .filter((m) => !m.knockoutPlaceholder && !isMatchDeadlinePassed(m.matchDate) && m.actual?.homeScore == null)
       .sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate))[0] || null;
   }, [matches]);
+
+  const unpredictedTotal = useMemo(() => {
+    return matches.reduce(
+      (n, m) =>
+        !m.knockoutPlaceholder &&
+        !isMatchDeadlinePassed(m.matchDate) &&
+        m.actual?.homeScore == null &&
+        m.predictions?.[user?.uid]?.homeScore == null
+          ? n + 1
+          : n,
+      0,
+    );
+  }, [matches, user]);
 
   const unpredictedMatches = useMemo(() => {
     return matches
       .filter((m) =>
-        m.stage === 'group' &&
+        !m.knockoutPlaceholder &&
         !isMatchDeadlinePassed(m.matchDate) &&
         m.actual?.homeScore == null &&
         m.predictions?.[user?.uid]?.homeScore == null
@@ -278,32 +282,30 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
     });
   }, [submitPrediction]);
 
-  useEffect(() => {
-    if (unpredictedMatches.length === 0) return;
-    const tick = () => {
-      const now = Date.now();
-      const next = {};
-      unpredictedMatches.forEach((m) => {
-        const deadline = getMatchDeadline(m.matchDate);
-        const remaining = deadline.getTime() - now;
-        if (remaining <= 0) {
-          next[m.matchKey] = 'Deadline passed';
-        } else {
-          const d = Math.floor(remaining / 86400000);
-          const h = Math.floor((remaining % 86400000) / 3600000);
-          const min = Math.floor((remaining % 3600000) / 60000);
-          const s = Math.floor((remaining % 60000) / 1000);
-          if (d > 0) next[m.matchKey] = `${d}d ${h}h ${min}m ${s}s`;
-          else if (h > 0) next[m.matchKey] = `${h}h ${min}m ${s}s`;
-          else next[m.matchKey] = `${min}m ${s}s`;
-        }
-      });
-      setHeroCountdowns(next);
-    };
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [unpredictedMatches]);
+  useTickingInterval(() => {
+    if (unpredictedMatches.length === 0) {
+      setHeroCountdowns((prev) => (Object.keys(prev).length ? {} : prev));
+      return;
+    }
+    const now = Date.now();
+    const next = {};
+    unpredictedMatches.forEach((m) => {
+      const deadline = getMatchDeadline(m.matchDate);
+      const remaining = deadline.getTime() - now;
+      if (remaining <= 0) {
+        next[m.matchKey] = 'Deadline passed';
+      } else {
+        const d = Math.floor(remaining / 86400000);
+        const h = Math.floor((remaining % 86400000) / 3600000);
+        const min = Math.floor((remaining % 3600000) / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+        if (d > 0) next[m.matchKey] = `${d}d ${h}h ${min}m ${s}s`;
+        else if (h > 0) next[m.matchKey] = `${h}h ${min}m ${s}s`;
+        else next[m.matchKey] = `${min}m ${s}s`;
+      }
+    });
+    setHeroCountdowns(next);
+  }, 1000, unpredictedMatches.length > 0);
 
   if (!dbReady) {
     return <div className="my-predictions"><div className="my-predictions-empty">Loading...</div></div>;
@@ -311,64 +313,100 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
 
   const heroVenueInfo = nextActualMatch ? parseVenue(nextActualMatch.venue) : null;
 
-  const groupContent = groupPredicted.length > 0
-    ? (() => {
-        const dates = [...new Set(groupPredicted.map(m => m.matchDate.split('T')[0]))].sort();
-        const filteredDates = predFilter === 'all'
-          ? dates
-          : dates.filter(d => groupPredicted.some(m => m.matchDate.startsWith(d) && m.matchday === parseInt(predFilter.replace('round', ''))));
-        if (filteredDates.length === 0) return null;
-        return filteredDates.map(date => {
-          const dayMatches = groupPredicted.filter(m => m.matchDate.startsWith(date));
-          const isWildCardDate = wildCardActivated?.day === date;
-          return (
-            <div key={date} className={`my-pred-date-section${isWildCardDate ? ' my-pred-date-section--wildcard' : ''}`}>
-              <div className="my-pred-date-header">
-                <span className="my-pred-date-label">
-                  {new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
-                {isWildCardDate && <span className="my-pred-date-badge">{'\u26A1'} Wild Card</span>}
-              </div>
-              <div className="my-pred-date-matches">
-                {dayMatches.map(m => {
-                  const pred = m.predictions[user.uid];
-                  const actual = m.actual;
-                  return (
-                    <div key={m.matchKey} className={`wc-match-row${isWildCardDate ? ' wc-match-row--wc-highlight' : ''}`} role="button" tabIndex={0} onClick={() => setModalMatchKey(m.matchKey)} onKeyDown={(e) => e.key === 'Enter' && setModalMatchKey(m.matchKey)}>
-                      <span className="wc-match-status">{matchStatusIcon(m)}</span>
-                      <span className="wc-match-teams">
-                        <span className="wc-match-teams-home">
-                          <FlagImg team={m.homeTeam} />
-                          <span className="wc-team-name">{shortTeam(m.homeTeam)}</span>
-                        </span>
-                        {actual?.homeScore != null && (
-                          <span className="wc-inline-score wc-inline-score--actual">
-                            {actual.homeScore} {'\u2013'} {actual.awayScore}
-                          </span>
-                        )}
-                        <span className="wc-match-teams-away">
-                          <span className="wc-team-name">{shortTeam(m.awayTeam)}</span>
-                          <FlagImg team={m.awayTeam} />
-                        </span>
-                      </span>
-                      <span className="wc-match-points">
-                        {actual?.homeScore != null && m.points?.[user.uid] != null && (
-                          <span className="my-pred-pts">+{m.points[user.uid]}</span>
-                        )}
-                      </span>
-                      <span className="wc-match-date">{formatMatchKickoff(m.matchDate)}</span>
-                      </div>
-                    );
-                  })}
-               </div>
-            </div>
-          );
-        });
-      })()
-    : null;
-
   return (
+    <>
     <div className="my-predictions">
+      <div className="my-pred-mobile-tiles" role="tablist" aria-label="Mobile predictions tabs">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileView === 'outstanding'}
+          className={`my-pred-mobile-tile ${mobileView === 'outstanding' ? 'is-active' : ''}`}
+          onClick={() => setMobileView('outstanding')}
+        >
+          <span className="my-pred-mobile-tile-icon">{'\u26BD'}</span>
+          <span className="my-pred-mobile-tile-count">{unpredictedTotal}</span>
+          <span className="my-pred-mobile-tile-label">Outstanding</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileView === 'done'}
+          className={`my-pred-mobile-tile ${mobileView === 'done' ? 'is-active' : ''}`}
+          onClick={() => setMobileView('done')}
+        >
+          <span className="my-pred-mobile-tile-icon">{'\u2705'}</span>
+          <span className="my-pred-mobile-tile-count">{predicted.length}</span>
+          <span className="my-pred-mobile-tile-label">My Picks</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileView === 'wildcard'}
+          className={`my-pred-mobile-tile ${mobileView === 'wildcard' ? 'is-active' : ''}`}
+          onClick={() => setMobileView('wildcard')}
+        >
+          <span className="my-pred-mobile-tile-icon">{'\u26A1'}</span>
+          <span className="my-pred-mobile-tile-count my-pred-mobile-tile-count--text">
+            {hasWCRound ? (wildCardActivated ? 'USED' : 'AVAILABLE') : '\u2014'}
+          </span>
+          <span className="my-pred-mobile-tile-label">Wildcard</span>
+        </button>
+      </div>
+
+      <div className="my-pred-mobile-list">
+        {mobileView === 'outstanding' && (
+          <div className="my-pred-mobile-outstanding">
+            {unpredictedMatches.length === 0 ? (
+              <div className="my-pred-mobile-empty">All caught up {'\u2014'} every group-stage match predicted. {'\uD83C\uDF89'}</div>
+            ) : (
+              unpredictedMatches.slice(0, 3).map((m) => (
+                <MobilePredictRow key={m.matchKey} m={m} user={user} setModalMatchKey={setModalMatchKey} />
+              ))
+            )}
+          </div>
+        )}
+
+        {mobileView === 'done' && (
+          <div className="my-pred-mobile-done">
+            {predicted.length === 0 ? (
+              <div className="my-pred-mobile-empty">No predictions yet. Tap {'\u201C'}Predict Outstanding{'\u201D'} to start.</div>
+            ) : (
+              predicted.map((m) => (
+                <MobilePredictRow key={m.matchKey} m={m} user={user} setModalMatchKey={setModalMatchKey} done />
+              ))
+            )}
+          </div>
+        )}
+
+        {mobileView === 'wildcard' && (
+          <div className="my-pred-mobile-wc">
+            {!hasWCRound ? (
+              <div className="my-pred-mobile-wc-status">Wild Card is only available during the current group-stage round.</div>
+            ) : wildCardActivated ? (
+              <>
+                <div className="my-pred-mobile-wc-status">{'\u26A1'} Wild Card redeemed for {formatDateShort(wildCardActivated.day + 'T00:00:00Z')}. All predictions on that day get {'\u00D7'}{WILD_CARD_MULTIPLIER} points.</div>
+                <button type="button" className="my-pred-wc-activate-btn" onClick={() => setShowWcFixtures(true)}>
+                  {'\u26A1'} View redeemed fixtures
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="my-pred-mobile-wc-status">Pick a day. Every prediction on that day earns {'\u00D7'}{WILD_CARD_MULTIPLIER} the normal points.</div>
+                <button type="button" className="my-pred-wc-info-btn" onClick={() => setShowWcInfo(true)}>
+                  How scoring works
+                </button>
+                <button type="button" className="my-pred-wc-activate-btn" onClick={onOpenWildCard}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+                    <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" fill="#3ddc84" />
+                  </svg> Activate Wild Card
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
       {unpredictedMatches.length > 0 && (
         <div className="my-pred-hero">
           <div className="my-pred-hero-title">{'\u26BD'} Quick Predict</div>
@@ -382,7 +420,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
                   <div className="my-pred-hero-game-row">
                     <div className="my-pred-hero-game-team">
                       <FlagImg team={m.homeTeam} size={24} />
-                      <span className="my-pred-hero-game-name">{m.homeTeam}</span>
+                      <span className="my-pred-hero-game-name">{shortTeam(m.homeTeam)}</span>
                     </div>
                     <div className="my-pred-hero-game-score-wrap">
                       <input
@@ -403,7 +441,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
                     </div>
                     <div className="my-pred-hero-game-team my-pred-hero-game-team--right">
                       <FlagImg team={m.awayTeam} size={24} />
-                      <span className="my-pred-hero-game-name">{m.awayTeam}</span>
+                      <span className="my-pred-hero-game-name">{shortTeam(m.awayTeam)}</span>
                     </div>
                   </div>
                   <div className="my-pred-hero-game-footer">
@@ -432,21 +470,13 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
                 What's this?
               </button>
               <button type="button" className="my-pred-wc-activate-btn" onClick={onOpenWildCard}>
-                {'\u26A1'} Activate Now
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+                  <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" fill="#3ddc84" />
+                </svg> Activate Now
               </button>
             </div>
           ) : hasWCRound && wildCardActivated ? (
             <div className="my-pred-wc-tile my-pred-wc-tile--activated">
-              <div className="my-pred-wc-tile-content">
-                <div className="my-pred-wc-tile-header">{'\u26A1\uFE0F'} Wild Card Active</div>
-                <div className="my-pred-wc-tile-sub">
-                  Round {wildCardActivated.round} ({wildCardActivated.label})
-                </div>
-                <div className="my-pred-wc-tile-day">
-                  {new Date(wildCardActivated.day + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </div>
-                <div className="my-pred-wc-tile-badge">&times;{WILD_CARD_MULTIPLIER} Active</div>
-              </div>
               <button type="button" className="my-pred-wc-activate-btn" onClick={() => setShowWcFixtures(true)}>
                 {'\u26A1'} Redeemed
               </button>
@@ -461,17 +491,15 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
             <button type="button" className="my-pred-next-card" onClick={() => setModalMatchKey(nextActualMatch.matchKey)}>
               <div className="my-pred-next-badge">{'\u26BD'} NEXT MATCH</div>
               <div className="my-pred-next-teams">
-                <FlagImg team={nextActualMatch.homeTeam} size={40} />
+                <FlagImg team={nextActualMatch.homeTeam} size={28} />
                 <div className="my-pred-next-team">
                   <span className="my-pred-next-name">{nextActualMatch.homeTeam}</span>
-                  <span className="my-pred-next-rank">FIFA #{getTeamData(nextActualMatch.homeTeam).fifaRank}</span>
                 </div>
                 <span className="my-pred-next-vs">vs</span>
                 <div className="my-pred-next-team my-pred-next-team--away">
                   <span className="my-pred-next-name">{nextActualMatch.awayTeam}</span>
-                  <span className="my-pred-next-rank">FIFA #{getTeamData(nextActualMatch.awayTeam).fifaRank}</span>
                 </div>
-                <FlagImg team={nextActualMatch.awayTeam} size={40} />
+                <FlagImg team={nextActualMatch.awayTeam} size={28} />
               </div>
               <div className="my-pred-next-venue">{'\uD83C\uDFDF\uFE0F'} {heroVenueInfo?.stadium}, {heroVenueInfo?.city}</div>
               <div className="my-pred-next-kickoff">{'\u26BD'} {formatMatchKickoff(nextActualMatch.matchDate)}</div>
@@ -485,7 +513,6 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
                     <span className="my-pred-next-pred-colon">:</span>
                     <span className="my-pred-next-pred-score">{nextActualMatch.predictions[user.uid].awayScore}</span>
                     <FlagImg team={nextActualMatch.awayTeam} size={16} />
-                    <span className="my-pred-next-pred-btn">Edit</span>
                   </div>
                 ) : (
                   <span className="my-pred-next-pred-btn my-pred-next-pred-btn--primary">{'\u26A1'} Predict this match</span>
@@ -508,22 +535,18 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
               </div>
               <div className="my-pred-podium-rows">
                 {[
-                  { key: 'first', icon: '\uD83E\uDD47', team: podiumPicks.first || pp?.first || pp?.initial?.first, pts: PODIUM_POINTS.first },
-                  { key: 'second', icon: '\uD83E\uDD48', team: podiumPicks.second || pp?.second || pp?.initial?.second, pts: PODIUM_POINTS.second },
-                  { key: 'third', icon: '\uD83E\uDD49', team: podiumPicks.third || pp?.third || pp?.initial?.third, pts: PODIUM_POINTS.third },
+                  { key: 'first', icon: '\uD83E\uDD47', team: podiumPicks.first, pts: PODIUM_POINTS.first },
+                  { key: 'second', icon: '\uD83E\uDD48', team: podiumPicks.second, pts: PODIUM_POINTS.second },
+                  { key: 'third', icon: '\uD83E\uDD49', team: podiumPicks.third, pts: PODIUM_POINTS.third },
                 ].map((p) => (
                   <div key={p.key} className="my-pred-podium-row">
                     <span className="my-pred-podium-icon">{p.icon}</span>
                     <span className="my-pred-podium-team">{p.team || '\u2014'}</span>
-                    <span className="my-pred-podium-pts">+{podiumTriple ? p.pts * PODIUM_TRIPLE_MULTIPLIER : p.pts} pts</span>
+                    <span className="my-pred-podium-pts">+{p.pts} pts</span>
                   </div>
                 ))}
               </div>
-              <div className="my-pred-podium-note">
-                {podiumFinalized
-                  ? `Final picks locked${podiumTriple ? ' \u2014 triple points active!' : ''}`
-                  : 'Initial picks set \u2014 you can update after group stage'}
-              </div>
+              <div className="my-pred-podium-note">Picks are locked and cannot be changed.</div>
               {otherPodiumData.totalOthers > 0 && (
                 <div className="my-pred-others-section">
                   <div className="my-pred-others-count">{'\uD83D\uDC65'} {otherPodiumData.totalOthers} other player{otherPodiumData.totalOthers === 1 ? '' : 's'} submitted picks</div>
@@ -587,7 +610,55 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
             </div>
           </div>
 
-          {groupContent}
+          {[0, 1, 2].map((roundIdx) => {
+            if (predFilter !== 'all' && predFilter !== `round${roundIdx + 1}`) return null;
+            const dayMatches = groupPredicted.filter((m) => isDateInRound(getLocalDateStr(m.matchDate), roundIdx));
+            if (dayMatches.length === 0) return null;
+
+            const byDate = {};
+            dayMatches.forEach((m) => {
+              const d = getLocalDateStr(m.matchDate);
+              if (!byDate[d]) byDate[d] = [];
+              byDate[d].push(m);
+            });
+            const sortedDates = Object.keys(byDate).sort();
+
+            return (
+              <div key={roundIdx} className="wc-round-section">
+                <div className="wc-round-title">Round {roundIdx + 1}</div>
+                <div className="my-pred-date-grid">
+                  {sortedDates.map((dateKey) => (
+                    <div key={dateKey} className={`my-pred-date-col${wildCardActivated?.day === dateKey ? ' my-pred-date-col--wc' : ''}`}>
+                      <div className="my-pred-date-col-header">
+                        {formatDateMonthDay(dateKey + 'T00:00:00Z')}
+                      </div>
+                      {byDate[dateKey].map((m) => {
+                        const pred = m.predictions?.[user.uid];
+                        const venueInfo = parseVenue(m.venue);
+                        return (
+                          <div key={m.matchKey} className="my-pred-tiny-tile" role="button" tabIndex={0} onClick={() => setModalMatchKey(m.matchKey)} onKeyDown={(e) => e.key === 'Enter' && setModalMatchKey(m.matchKey)}>
+                            <div className="my-pred-tiny-row">
+                              <FlagImg team={m.homeTeam} size={14} />
+                              <span className="my-pred-tiny-name">{shortTeam(m.homeTeam)}</span>
+                              <span className="my-pred-tiny-score">{pred ? pred.homeScore : '-'}</span>
+                              <span className="my-pred-tiny-vs">VS</span>
+                              <span className="my-pred-tiny-score">{pred ? pred.awayScore : '-'}</span>
+                              <span className="my-pred-tiny-name">{shortTeam(m.awayTeam)}</span>
+                              <FlagImg team={m.awayTeam} size={14} />
+                            </div>
+                            <div className="my-pred-tiny-meta">
+                              <span className="my-pred-tiny-venue">{'\uD83D\uDCCD'} {venueInfo?.stadium}, {venueInfo?.city}</span>
+                              <span className="my-pred-tiny-kickoff">{'\u23F0'} {formatMatchKickoff(m.matchDate)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
           {predFilter === 'all' && knockoutPredicted.length > 0 && (
             <div className="wc-knockout-section">
@@ -664,7 +735,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
         <div className="modal-backdrop" role="presentation" onClick={() => setShowWcFixtures(false)}>
           <div className="panel modal-panel wc-info-panel" role="dialog" aria-modal="true" aria-label="Wild Card fixtures" onClick={(e) => e.stopPropagation()}>
             <div className="podium-modal-header">
-              <h2 className="podium-modal-title">{'\u26A1'} Wild Card &mdash; {new Date(wildCardActivated.day + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</h2>
+              <h2 className="podium-modal-title">{'\u26A1'} Wild Card &mdash; {formatDateShort(wildCardActivated.day + 'T00:00:00Z')}</h2>
               <button type="button" className="podium-modal-close" onClick={() => setShowWcFixtures(false)}>{'\u2715'}</button>
             </div>
             <div className="wc-fixtures-body">
@@ -725,6 +796,38 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
         </div>,
         document.body
       )}
+    </div>
+    </>
+  );
+}
+
+function MobilePredictRow({ m, user, setModalMatchKey, done }) {
+  const pred = m.predictions?.[user?.uid];
+  const venue = parseVenue(m.venue);
+  return (
+    <div
+      className="my-pred-mobile-row"
+      role="button"
+      tabIndex={0}
+      onClick={() => setModalMatchKey(m.matchKey)}
+      onKeyDown={(e) => e.key === 'Enter' && setModalMatchKey(m.matchKey)}
+    >
+      <div className="my-pred-mobile-row-flags">
+        <FlagImg team={m.homeTeam} size={20} />
+        <span className="my-pred-mobile-row-vs">vs</span>
+        <FlagImg team={m.awayTeam} size={20} />
+      </div>
+      <div className="my-pred-mobile-row-teams">
+        <span>{shortTeam(m.homeTeam)}</span>
+        <span className="my-pred-mobile-row-score">
+          {done && pred ? `${pred.homeScore} \u2013 ${pred.awayScore}` : '\u2014 : \u2014'}
+        </span>
+        <span>{shortTeam(m.awayTeam)}</span>
+      </div>
+      <div className="my-pred-mobile-row-meta">
+        <span>{'\u23F0'} {formatMatchKickoff(m.matchDate)}</span>
+        {venue?.stadium && <span>{'\uD83D\uDCCD'} {venue.stadium}</span>}
+      </div>
     </div>
   );
 }

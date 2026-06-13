@@ -5,11 +5,14 @@ import { MASTER_LEAGUE_ID, MASTER_LEAGUE_NAME } from '../utils/leaguesData.js';
 import {
   WORLD_CUP_2026_MATCHES,
   PODIUM_POINTS,
-  PODIUM_TRIPLE_MULTIPLIER,
+  WILD_CARD_MULTIPLIER,
   isMatchDeadlinePassed,
   isExactScore,
   getFlagUrl,
   formatMatchKickoff,
+  getCurrentRound,
+  GROUP_ROUND_DATES,
+  formatDateShort,
 } from '../utils/worldCupData.js';
 import { getTeamData } from '../utils/teamData.js';
 import useTickingInterval from '../hooks/useTickingInterval.js';
@@ -181,6 +184,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
   const nextKickoff = useMemo(() => {
     return matches
       .filter((m) => {
+        if (m.knockoutPlaceholder) return false;
         if (isMatchDeadlinePassed(m.matchDate)) return false;
         if (m.actual?.homeScore != null) return false;
         return true;
@@ -263,6 +267,69 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
   return (
     <section className="panel dash-panel">
       <h1 className="dash-title">{user?.displayName?.split(' ')[0] || 'Player'}'s Dashboard</h1>
+
+      {/* Wild Card Tile */}
+      <div className="dash-wildcard-tile">
+        <div className="dash-wildcard-header">
+          <span className="dash-wildcard-icon">{'\u26A1'}</span>
+          <span className="dash-wildcard-title">Wild Card</span>
+        </div>
+        {(() => {
+          const currentRound = getCurrentRound();
+          const wcKey = currentRound ? 'round' + currentRound.round : null;
+          const wcData = wcKey ? userDoc?.wildCards?.[wcKey] : null;
+          const allRoundsDone = GROUP_ROUND_DATES.every((r) => Date.now() >= new Date(r.endDate + 'T23:59:59Z').getTime());
+
+          if (allRoundsDone) {
+            return (
+              <div className="dash-wildcard-body">
+                <div className="dash-wildcard-status dash-wildcard-status--done">All rounds complete</div>
+                <p className="dash-wildcard-desc">The Wild Card is available during the group stage only.</p>
+              </div>
+            );
+          }
+
+          if (wcData) {
+            return (
+              <div className="dash-wildcard-body">
+                <div className="dash-wildcard-status dash-wildcard-status--used">{'\u2714'} Wild Card Used</div>
+                <p className="dash-wildcard-desc">
+                  Activated for <strong>{formatDateShort(wcData.day + 'T00:00:00Z')}</strong> — all predictions on that day scored {'\u00D7'}{WILD_CARD_MULTIPLIER} points.
+                </p>
+              </div>
+            );
+          }
+
+          if (currentRound) {
+            return (
+              <div className="dash-wildcard-body">
+                <div className="dash-wildcard-status dash-wildcard-status--available">{'\u26A1'} Available Now</div>
+                <p className="dash-wildcard-desc">
+                  Multiply all points on one matchday by <strong>{WILD_CARD_MULTIPLIER}x</strong>. Pick your best day — use it wisely!
+                </p>
+                <button type="button" className="dash-wildcard-btn" onClick={() => navigate('/my-predictions')}>
+                  Activate Wild Card {'\u2192'}
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <div className="dash-wildcard-body">
+              <div className="dash-wildcard-status dash-wildcard-status--waiting">Coming Soon</div>
+              <p className="dash-wildcard-desc">
+                The Wild Card lets you multiply all points on one matchday by <strong>{WILD_CARD_MULTIPLIER}x</strong>. It unlocks at the start of the group stage.
+              </p>
+              <ul className="dash-wildcard-bullets">
+                <li>Pick any matchday during the group stage</li>
+                <li>All your predictions on that day score 5x points</li>
+                <li>Use it once per round (3 rounds total)</li>
+                <li>Choose a day where you're most confident</li>
+              </ul>
+            </div>
+          );
+        })()}
+      </div>
 
       {/* Next Match */}
       {nextKickoff && (
@@ -413,13 +480,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
               )}
             </div>
             {userDoc?.podiumPrediction && (() => {
-              const pp = userDoc.podiumPrediction;
-              const picks = pp.final || pp.initial || pp;
-              const isFinalized = !!pp.final;
-              const isTripleEligible = isFinalized && pp.initial && pp.final
-                && pp.initial.first === pp.final.first
-                && pp.initial.second === pp.final.second
-                && pp.initial.third === pp.final.third;
+              const picks = userDoc.podiumPrediction;
               return (
                 <div className="dash-podium-mini">
                   <div className="dash-podium-mini-title">My Podium Picks</div>
@@ -431,7 +492,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
                     <div key={p.key} className="dash-podium-mini-row">
                       <span className="dash-podium-mini-medal">{p.icon}</span>
                       <span className="dash-podium-mini-team">{p.team}</span>
-                      <span className="dash-podium-mini-pts">+{isTripleEligible ? p.pts * PODIUM_TRIPLE_MULTIPLIER : p.pts}</span>
+                      <span className="dash-podium-mini-pts">+{p.pts}</span>
                     </div>
                   ))}
                 </div>
@@ -504,6 +565,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
           })}
         </div>
       </div>
+
     </section>
   );
 }

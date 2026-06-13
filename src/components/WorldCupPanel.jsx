@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   collection,
   doc,
+  limit,
   onSnapshot,
-  writeBatch,
+  query,
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -20,12 +21,19 @@ import {
   isMatchPast,
   getFlagUrl,
   formatMatchKickoff,
+  getLocalDateStr,
+  isDateInRound,
+  formatDateMonthDay,
   POINTS_CORRECT_OUTCOME,
   POINTS_WRONG,
 } from '../utils/worldCupData.js';
 import { autoFetchResults } from '../utils/worldCupApi.js';
+import { autoPopulateKnockoutBracket } from '../utils/worldCupData.js';
 import { getTeamData } from '../utils/teamData.js';
 import MatchDetailModal from './MatchDetailModal.jsx';
+import useTickingInterval from '../hooks/useTickingInterval.js';
+
+const USERS_QUERY_LIMIT = 500;
 
 const SCORE_EMPTY = { homeScore: null, awayScore: null };
 const USER_COLORS = ['#5bc0ff', '#ff7eb3', '#3ddc84', '#f0c040', '#c084fc', '#fb923c', '#f97316', '#22d3ee'];
@@ -33,11 +41,6 @@ const USER_COLORS = ['#5bc0ff', '#ff7eb3', '#3ddc84', '#f0c040', '#c084fc', '#fb
 const deriveOutcome = (h, a) => {
   if (h == null || a == null) return null;
   return h > a ? 'home' : h < a ? 'away' : 'draw';
-};
-
-const formatDate = (iso) => {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 function FlagImg({ team, size = 24 }) {
@@ -51,26 +54,9 @@ function FlagImg({ team, size = 24 }) {
       width={size}
       height={size * 0.75}
       loading="lazy"
+      onError={(e) => { e.target.style.display = 'none' }}
     />
   );
-}
-
-function seedWorldCupMatches(firestore) {
-  if (!firestore) return;
-  const batch = writeBatch(firestore);
-  WORLD_CUP_2026_MATCHES.forEach((match) => {
-    const ref = doc(firestore, 'worldCupPredictions', match.matchKey);
-    batch.set(ref, {
-      ...match,
-      predictions: {},
-      actual: SCORE_EMPTY,
-      actualSetAt: null,
-      points: {},
-      status: 'open',
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
-  });
-  batch.commit().catch((err) => console.warn('World Cup seed failed', err));
 }
 
 export default function WorldCupPanel({ user, firestore, userDoc }) {
@@ -85,8 +71,8 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFetching, setIsFetching] = useState(false);
   const [fetchStatus, setFetchStatus] = useState(null);
-
-  const seededRef = useRef(false);
+  const [isPopulating, setIsPopulating] = useState(false);
+  const [populateStatus, setPopulateStatus] = useState(null);
 
   useEffect(() => {
     if (!firestore) { setDbReady(true); return; }
@@ -94,17 +80,13 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setMatchDocs(docs);
       setDbReady(true);
-      if (docs.length === 0 && !seededRef.current) {
-        seededRef.current = true;
-        seedWorldCupMatches(firestore);
-      }
     }, (err) => { console.warn('WC snapshot error', err); setDbReady(true); });
     return unsub;
   }, [firestore]);
 
   useEffect(() => {
     if (!firestore) return;
-    const unsub = onSnapshot(collection(firestore, 'users'), (snap) => {
+    const unsub = onSnapshot(query(collection(firestore, 'users'), limit(USERS_QUERY_LIMIT)), (snap) => {
       const map = {};
       snap.docs.forEach((d) => { map[d.id] = d.data(); });
       setUsersMap(map);
@@ -114,12 +96,13 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
 
   const isAdmin = user && usersMap[user.uid]?.role === 'admin';
 
+  const currentRound = getCurrentRound();
+
   const wcActivatedDay = useMemo(() => {
-    const round = getCurrentRound();
-    if (!round || !userDoc) return null;
-    const wc = userDoc.wildCards?.['round' + round.round];
+    if (!currentRound || !userDoc) return null;
+    const wc = userDoc.wildCards?.['round' + currentRound.round];
     return wc?.day || null;
-  }, [userDoc]);
+  }, [userDoc, currentRound]);
 
   const sortedUserUids = useMemo(() => {
     return Object.keys(usersMap).sort((a, b) => {
@@ -141,17 +124,20 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   const matches = useMemo(() => {
     const map = {};
     matchDocs.forEach((d) => { map[d.matchKey] = d; });
-    return WORLD_CUP_2026_MATCHES.map((m) => {
+    const result = WORLD_CUP_2026_MATCHES.map((m) => {
       const doc = map[m.matchKey] || {};
       return {
         ...m,
-        ...doc,
         id: doc.id || m.matchKey,
+        homeTeam: doc.homeTeam || m.homeTeam,
+        awayTeam: doc.awayTeam || m.awayTeam,
+        knockoutPlaceholder: doc.knockoutPlaceholder !== undefined ? doc.knockoutPlaceholder : m.knockoutPlaceholder,
         predictions: doc.predictions || {},
         actual: doc.actual || SCORE_EMPTY,
         points: doc.points || {},
       };
     });
+    return result;
   }, [matchDocs]);
 
   const predictedCount = useMemo(
@@ -225,6 +211,7 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   const nextMatch = useMemo(() => {
     const upcoming = matches
       .filter((m) => {
+        if (m.knockoutPlaceholder) return false;
         if (isMatchDeadlinePassed(m.matchDate)) return false;
         if (m.actual?.homeScore != null) return false;
         const pred = m.predictions?.[user?.uid];
@@ -237,6 +224,7 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   const nextKickoff = useMemo(() => {
     const upcoming = matches
       .filter((m) => {
+        if (m.knockoutPlaceholder) return false;
         if (isMatchPast(m.matchDate)) return false;
         if (m.actual?.homeScore != null) return false;
         return true;
@@ -264,13 +252,9 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
 
   const [crowdMatchIdx, setCrowdMatchIdx] = useState(0);
 
-  useEffect(() => {
-    if (crowdTargets.length < 2) return;
-    const id = setInterval(() => {
-      setCrowdMatchIdx((prev) => (prev + 1) % crowdTargets.length);
-    }, 3000);
-    return () => clearInterval(id);
-  }, [crowdTargets]);
+  useTickingInterval(() => {
+    setCrowdMatchIdx((prev) => (prev + 1) % crowdTargets.length);
+  }, 3000, crowdTargets.length >= 2);
 
   const crowdData = useMemo(() => {
     const target = crowdTargets[crowdMatchIdx] || crowdTargets[0] || null;
@@ -304,27 +288,25 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   }, [matches, user]);
 
   const [countdown, setCountdown] = useState('');
+  const [now, setNow] = useState(() => Date.now());
 
-  useEffect(() => {
-    const tick = () => {
-      if (!nextKickoff) { setCountdown(''); return; }
-      const diff = new Date(nextKickoff.matchDate).getTime() - Date.now();
-      if (diff <= 0) { setCountdown('LIVE'); return; }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      let parts = [];
-      if (d > 0) parts.push(`${d}d`);
-      parts.push(`${h}h`.padStart(3, ' '));
-      parts.push(`${m}m`.padStart(3, ' '));
-      parts.push(`${s}s`.padStart(3, ' '));
-      setCountdown(parts.join(' '));
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [nextKickoff]);
+  useTickingInterval(() => {
+    const t = Date.now();
+    setNow(t);
+    if (!nextKickoff) { setCountdown(''); return; }
+    const diff = new Date(nextKickoff.matchDate).getTime() - t;
+    if (diff <= 0) { setCountdown('LIVE'); return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const parts = [];
+    if (d > 0) parts.push(`${d}d`);
+    parts.push(`${h}h`.padStart(3, ' '));
+    parts.push(`${m}m`.padStart(3, ' '));
+    parts.push(`${s}s`.padStart(3, ' '));
+    setCountdown(parts.join(' '));
+  }, 1000, !!nextKickoff);
 
   const submitPrediction = useCallback(async (matchKey, homeScore, awayScore) => {
     if (!firestore || !user) return;
@@ -342,7 +324,7 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
     const match = matches.find((m) => m.matchKey === matchKey);
     if (match) {
       Object.entries(match.predictions || {}).forEach(([uid, pred]) => {
-        pts[uid] = calculateMatchPoints(pred, { homeScore: Number(homeScore), awayScore: Number(awayScore) });
+        pts[uid] = calculateMatchPoints(pred, { homeScore: Number(homeScore), awayScore: Number(awayScore) }, match.matchDate, null);
       });
     }
     await updateDoc(ref, {
@@ -372,6 +354,32 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
     setFetchStatus(result);
     setIsFetching(false);
   }, [firestore, isAdmin, matchDocs]);
+
+  const handleAutoPopulateKnockout = useCallback(async () => {
+    if (!firestore || !isAdmin) return;
+    setIsPopulating(true);
+    setPopulateStatus(null);
+    try {
+      const staticMap = {};
+      WORLD_CUP_2026_MATCHES.forEach((m) => { staticMap[m.matchKey] = m; });
+      const updated = autoPopulateKnockoutBracket(matches);
+      let written = 0;
+      for (const m of updated) {
+        const orig = staticMap[m.matchKey];
+        if (!orig) continue;
+        if (m.homeTeam === orig.homeTeam && m.awayTeam === orig.awayTeam) continue;
+        const ref = doc(firestore, 'worldCupPredictions', m.matchKey);
+        await updateDoc(ref, { homeTeam: m.homeTeam, awayTeam: m.awayTeam, knockoutPlaceholder: false, updatedAt: serverTimestamp() });
+        written++;
+      }
+      setPopulateStatus(written);
+    } catch (err) {
+      console.warn('Knockout auto-populate error', err);
+      setPopulateStatus(-1);
+    } finally {
+      setIsPopulating(false);
+    }
+  }, [firestore, isAdmin, matches]);
 
   const openModal = useCallback((matchKey) => {
     setModalMatchKey(matchKey);
@@ -432,6 +440,7 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
   };
 
   return (
+    <>
     <section className="panel lobby-panel wc-panel" aria-label="World Cup 2026">
       <header className="wc-header">
         <div className="wc-title-row">
@@ -482,22 +491,18 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
             {upcomingMatches[i] ? (
               <button type="button" className="wc-tile-inner" onClick={() => openModal(upcomingMatches[i].matchKey)}>
                 <div className="wc-tile-teams">
-                  <div className="wc-tile-team-row">
-                    <FlagImg team={upcomingMatches[i].homeTeam} size={24} />
-                    <span className="wc-tile-team-name">{shortTeam(upcomingMatches[i].homeTeam)}</span>
-                  </div>
+                  <FlagImg team={upcomingMatches[i].homeTeam} size={18} />
+                  <span className="wc-tile-team-name">{shortTeam(upcomingMatches[i].homeTeam)}</span>
                   <span className="wc-tile-vs">vs</span>
-                  <div className="wc-tile-team-row wc-tile-team-row--away">
-                    <FlagImg team={upcomingMatches[i].awayTeam} size={24} />
-                    <span className="wc-tile-team-name">{shortTeam(upcomingMatches[i].awayTeam)}</span>
-                  </div>
+                  <span className="wc-tile-team-name">{shortTeam(upcomingMatches[i].awayTeam)}</span>
+                  <FlagImg team={upcomingMatches[i].awayTeam} size={18} />
                 </div>
                 <div className="wc-tile-info">
                   <span className="wc-tile-venue">{'\uD83C\uDFDF\uFE0F'} {upcomingMatches[i].venue}</span>
                   <span className="wc-tile-kickoff">{'\u26BD'} {formatMatchKickoff(upcomingMatches[i].matchDate)}</span>
                 </div>
                 <div className="wc-tile-countdown-wrap">
-                  <TileCountdown matchDate={upcomingMatches[i].matchDate} />
+                  <TileCountdown matchDate={upcomingMatches[i].matchDate} now={now} />
                 </div>
                 <div className="wc-tile-prediction">
                   {user && upcomingMatches[i].predictions?.[user.uid] ? (
@@ -507,7 +512,7 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
                       <FlagImg team={upcomingMatches[i].awayTeam} size={14} />
                     </div>
                   ) : (
-                    <span className="wc-tile-pred-btn">{'\u26A1'} Predict</span>
+                    <span className="wc-tile-pred-btn">{'\u26A1'} Go to Predictions</span>
                   )}
                 </div>
               </button>
@@ -572,9 +577,14 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
         {isAdmin && (
-          <button type="button" className="wc-fetch-btn" onClick={handleAutoFetch} disabled={isFetching}>
-            {isFetching ? '\u23F3 Fetching\u2026' : '\uD83D\uDD04 Auto-Fetch Results'}
-          </button>
+          <>
+            <button type="button" className="wc-fetch-btn" onClick={handleAutoFetch} disabled={isFetching}>
+              {isFetching ? '\u23F3 Fetching\u2026' : '\uD83D\uDD04 Auto-Fetch Results'}
+            </button>
+            <button type="button" className="wc-fetch-btn" onClick={handleAutoPopulateKnockout} disabled={isPopulating}>
+              {isPopulating ? '\u23F3 Populating\u2026' : '\uD83C\uDFB3 Auto-Fill Knockout'}
+            </button>
+          </>
         )}
       </div>
       {fetchStatus && (
@@ -582,6 +592,15 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
           {'\u2705'} Fetched {fetchStatus.fetched} matches, wrote {fetchStatus.written} new result{fetchStatus.written === 1 ? '' : 's'}
           {fetchStatus.errors > 0 && (
             <span className="wc-fetch-status--error"> {'\u274C'} {fetchStatus.errors} error{fetchStatus.errors === 1 ? '' : 's'}</span>
+          )}
+        </div>
+      )}
+      {populateStatus !== null && (
+        <div className="wc-fetch-status">
+          {populateStatus === -1 ? (
+            '\u274C Error populating knockout bracket'
+          ) : (
+            '\u2705 Updated ' + populateStatus + ' knockout match' + (populateStatus === 1 ? '' : 'es')
           )}
         </div>
       )}
@@ -635,39 +654,57 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
         </div>
       )}
 
-      {[1, 2, 3].map((day) => {
-        if (filter !== 'all' && filter !== `round${day}`) return null;
-        const dayMatches = grouped.group.filter((m) => m.matchday === day && isSearchMatch(m));
+      {[0, 1, 2].map((roundIdx) => {
+        if (filter !== 'all' && filter !== `round${roundIdx + 1}`) return null;
+        const dayMatches = grouped.group.filter((m) => isDateInRound(getLocalDateStr(m.matchDate), roundIdx) && isSearchMatch(m));
         if (dayMatches.length === 0) return null;
+
+        const byDate = {};
+        dayMatches.forEach((m) => {
+          const d = getLocalDateStr(m.matchDate);
+          if (!byDate[d]) byDate[d] = [];
+          byDate[d].push(m);
+        });
+        const sortedDates = Object.keys(byDate).sort();
+
         return (
-          <div key={day} className="wc-round-section">
-            <div className="wc-round-title">Round {day}</div>
-            <div className="wc-stage-matches">
-              {dayMatches.map((m) => (
-                <div key={m.matchKey} className={`wc-match-row${wcActivatedDay && m.matchDate.startsWith(wcActivatedDay) ? ' wc-match-row--wc-highlight' : ''}`} role="button" tabIndex={0} onClick={() => openModal(m.matchKey)} onKeyDown={(e) => e.key === 'Enter' && openModal(m.matchKey)}>
-                  <span className="wc-match-status">{matchStatusIcon(m)}</span>
-                  <span className="wc-match-teams">
-                    <span className="wc-match-teams-home">
-                      <FlagImg team={m.homeTeam} />
-                      <span className="wc-team-name">{shortTeam(m.homeTeam)}</span>
-                    </span>
-                    {m.actual?.homeScore != null ? (
-                      <span className="wc-inline-score wc-inline-score--actual">
-                        {m.actual.homeScore} {'\u2013'} {m.actual.awayScore}
-                      </span>
-                    ) : null}
-                    <span className="wc-match-teams-away">
-                      <span className="wc-team-name">{shortTeam(m.awayTeam)}</span>
-                      <FlagImg team={m.awayTeam} />
-                    </span>
-                  </span>
-                  <span className="wc-match-points">
-                    {m.actual?.homeScore != null && sortedUserUids.map((uid) => {
-                      const pts = m.points?.[uid];
-                      return pts != null ? pointsBadge(pts, isExactScore(m.predictions?.[uid], m.actual)) : null;
-                    })}
-                  </span>
-                  <span className="wc-match-date">{formatMatchKickoff(m.matchDate)}</span>
+          <div key={roundIdx} className="wc-round-section">
+            <div className="wc-round-title">Round {roundIdx + 1}</div>
+            <div className="my-pred-date-grid">
+              {sortedDates.map((dateKey) => (
+                <div key={dateKey} className={`my-pred-date-col${wcActivatedDay && dateKey === wcActivatedDay ? ' my-pred-date-col--wc' : ''}`}>
+                  <div className="my-pred-date-col-header">
+                    {formatDateMonthDay(dateKey + 'T00:00:00Z')}
+                  </div>
+                  {byDate[dateKey].map((m) => {
+                    const userPred = m.predictions?.[user?.uid];
+                    const isWcDay = wcActivatedDay && m.matchDate.startsWith(wcActivatedDay);
+                    return (
+                      <div key={m.matchKey} className={`my-pred-tiny-tile${isWcDay ? ' my-pred-tiny-tile--wc' : ''}`} role="button" tabIndex={0} onClick={() => openModal(m.matchKey)} onKeyDown={(e) => e.key === 'Enter' && openModal(m.matchKey)}>
+                        <div className="my-pred-tiny-row">
+                          <FlagImg team={m.homeTeam} size={14} />
+                          <span className="my-pred-tiny-name">{shortTeam(m.homeTeam)}</span>
+                          {m.actual?.homeScore != null ? (
+                            <span className="my-pred-tiny-score">{m.actual.homeScore}</span>
+                          ) : userPred ? (
+                            <span className="my-pred-tiny-score">{userPred.homeScore}</span>
+                          ) : null}
+                          <span className="my-pred-tiny-vs">VS</span>
+                          {m.actual?.homeScore != null ? (
+                            <span className="my-pred-tiny-score">{m.actual.awayScore}</span>
+                          ) : userPred ? (
+                            <span className="my-pred-tiny-score">{userPred.awayScore}</span>
+                          ) : null}
+                          <span className="my-pred-tiny-name">{shortTeam(m.awayTeam)}</span>
+                          <FlagImg team={m.awayTeam} size={14} />
+                        </div>
+                        <div className="my-pred-tiny-meta">
+                          <span className="my-pred-tiny-venue">{'\uD83D\uDCCD'} {m.venue}</span>
+                          <span className="my-pred-tiny-kickoff">{'\u23F0'} {formatMatchKickoff(m.matchDate)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -749,22 +786,18 @@ export default function WorldCupPanel({ user, firestore, userDoc }) {
         document.body
       )}
     </section>
+    </>
   );
 }
 
-function TileCountdown({ matchDate }) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
+function TileCountdown({ matchDate, now }) {
   const diff = new Date(matchDate).getTime() - now;
   if (diff <= 0) return <span className="wc-tile-countdown wc-tile-countdown--live">LIVE</span>;
   const d = Math.floor(diff / 86400000);
   const h = Math.floor((diff % 86400000) / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  let parts = [];
+  const parts = [];
   if (d > 0) parts.push(d + 'd');
   parts.push(h + 'h', m + 'm', s + 's');
   return <span className="wc-tile-countdown">{parts.join(' ')}</span>;
@@ -772,17 +805,13 @@ function TileCountdown({ matchDate }) {
 
 function shortTeam(name) {
   if (name === 'Bosnia and Herzegovina') return 'Bosnia';
-  if (name === "C\u00F4te d'Ivoire") return "C\u00F4te d'Ivoire";
-  if (name === 'Korea Republic') return 'S. Korea';
-  if (name === 'IR Iran') return 'Iran';
-  if (name === 'Cabo Verde') return 'C. Verde';
-  if (name === 'Congo DR') return 'Congo';
+  if (name === 'Ivory Coast' || name === "C\u00F4te d'Ivoire") return 'Ivory Coast';
+  if (name === 'South Korea' || name === 'Korea Republic') return 'S. Korea';
+  if (name === 'Iran' || name === 'IR Iran') return 'Iran';
+  if (name === 'Cape Verde' || name === 'Cabo Verde') return 'C. Verde';
+  if (name === 'DR Congo' || name === 'Congo DR') return 'DR Congo';
   if (name === 'Saudi Arabia') return 'Saudi Ar.';
-  if (name === 'Netherlands') return 'Netherlands';
-  if (name === 'Switzerland') return 'Switzerland';
-  if (name === 'Czechia') return 'Czechia';
-  if (name === 'T\u00FCrkiye') return 'T\u00FCrkiye';
-  if (name === 'New Zealand') return 'N. Zealand';
+  if (name === 'United States' || name === 'USA') return 'USA';
   if (name.length > 9) return name.slice(0, 8) + '\u2026';
   return name;
 }

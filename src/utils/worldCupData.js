@@ -1,100 +1,154 @@
 export const WORLD_CUP_2026_MATCHES = [
   // ========== GROUP STAGE ==========
-  // Group A — Mexico, South Africa, Korea Republic, Czechia
-  { matchKey: 'match-1',  matchNumber: 1,  stage: 'group', groupName: 'A', matchday: 1, homeTeam: 'Mexico',        awayTeam: 'South Africa',   matchDate: '2026-06-11T13:00:00-06:00', venue: 'Estadio Azteca',                      knockoutPlaceholder: false },
-  { matchKey: 'match-2',  matchNumber: 2,  stage: 'group', groupName: 'A', matchday: 1, homeTeam: 'Korea Republic', awayTeam: 'Czechia',        matchDate: '2026-06-11T20:00:00-06:00', venue: 'Estadio Akron',                      knockoutPlaceholder: false },
-  { matchKey: 'match-3',  matchNumber: 18, stage: 'group', groupName: 'A', matchday: 2, homeTeam: 'Czechia',        awayTeam: 'South Africa',   matchDate: '2026-06-18T12:00:00-04:00', venue: 'Mercedes-Benz Stadium',             knockoutPlaceholder: false },
-  { matchKey: 'match-4',  matchNumber: 21, stage: 'group', groupName: 'A', matchday: 2, homeTeam: 'Mexico',         awayTeam: 'Korea Republic', matchDate: '2026-06-18T19:00:00-06:00', venue: 'Estadio Akron',                      knockoutPlaceholder: false },
-  { matchKey: 'match-5',  matchNumber: 57, stage: 'group', groupName: 'A', matchday: 3, homeTeam: 'South Africa',   awayTeam: 'Korea Republic', matchDate: '2026-06-24T19:00:00-06:00', venue: 'Estadio BBVA',                       knockoutPlaceholder: false },
-  { matchKey: 'match-6',  matchNumber: 58, stage: 'group', groupName: 'A', matchday: 3, homeTeam: 'Czechia',        awayTeam: 'Mexico',         matchDate: '2026-06-24T19:00:00-06:00', venue: 'Estadio Azteca',                      knockoutPlaceholder: false },
+  // Matchday 1
 
-  // Group B — Canada, Bosnia and Herzegovina, Qatar, Switzerland
-  { matchKey: 'match-7',  matchNumber: 3,  stage: 'group', groupName: 'B', matchday: 1, homeTeam: 'Canada',                awayTeam: 'Bosnia and Herzegovina', matchDate: '2026-06-12T15:00:00-04:00', venue: 'BMO Field, Toronto',            knockoutPlaceholder: false },
-  { matchKey: 'match-8',  matchNumber: 8,  stage: 'group', groupName: 'B', matchday: 1, homeTeam: 'Qatar',                 awayTeam: 'Switzerland',            matchDate: '2026-06-13T12:00:00-07:00', venue: 'Levi\'s Stadium, Santa Clara',   knockoutPlaceholder: false },
-  { matchKey: 'match-9',  matchNumber: 20, stage: 'group', groupName: 'B', matchday: 2, homeTeam: 'Switzerland',           awayTeam: 'Bosnia and Herzegovina', matchDate: '2026-06-18T12:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',      knockoutPlaceholder: false },
-  { matchKey: 'match-10', matchNumber: 22, stage: 'group', groupName: 'B', matchday: 2, homeTeam: 'Canada',                awayTeam: 'Qatar',                  matchDate: '2026-06-18T15:00:00-07:00', venue: 'BC Place, Vancouver',            knockoutPlaceholder: false },
-  { matchKey: 'match-11', matchNumber: 55, stage: 'group', groupName: 'B', matchday: 3, homeTeam: 'Switzerland',           awayTeam: 'Canada',                 matchDate: '2026-06-24T12:00:00-07:00', venue: 'BC Place, Vancouver',            knockoutPlaceholder: false },
-  { matchKey: 'match-12', matchNumber: 56, stage: 'group', groupName: 'B', matchday: 3, homeTeam: 'Bosnia and Herzegovina', awayTeam: 'Qatar',                  matchDate: '2026-06-24T12:00:00-07:00', venue: 'Lumen Field, Seattle',           knockoutPlaceholder: false },
+  // Group A — Mexico (A1), South Africa (A2), South Korea (A3), Czechia (A4)
+  { matchKey: 'match-1',  matchNumber: 1,  stage: 'group', groupName: 'A', matchday: 1, homeTeam: 'Mexico',        awayTeam: 'South Africa',   matchDate: '2026-06-11T19:00:00Z', venue: 'Estadio Azteca, Mexico City, Mexico',            knockoutPlaceholder: false },
+  { matchKey: 'match-2',  matchNumber: 2,  stage: 'group', groupName: 'A', matchday: 1, homeTeam: 'South Korea',   awayTeam: 'Czechia',        matchDate: '2026-06-12T02:00:00Z', venue: 'Estadio Akron, Guadalajara, Mexico',             knockoutPlaceholder: false },
 
-  // Group C — Haiti, Scotland, Brazil, Morocco
-  { matchKey: 'match-13', matchNumber: 5,  stage: 'group', groupName: 'C', matchday: 1, homeTeam: 'Brazil',   awayTeam: 'Morocco',  matchDate: '2026-06-13T18:00:00-04:00', venue: 'MetLife Stadium, East Rutherford',      knockoutPlaceholder: false },
-  { matchKey: 'match-14', matchNumber: 7,  stage: 'group', groupName: 'C', matchday: 1, homeTeam: 'Haiti',    awayTeam: 'Scotland', matchDate: '2026-06-13T21:00:00-04:00', venue: 'Gillette Stadium, Foxborough',        knockoutPlaceholder: false },
-  { matchKey: 'match-15', matchNumber: 25, stage: 'group', groupName: 'C', matchday: 2, homeTeam: 'Scotland', awayTeam: 'Morocco',  matchDate: '2026-06-19T18:00:00-04:00', venue: 'Gillette Stadium, Foxborough',          knockoutPlaceholder: false },
-  { matchKey: 'match-16', matchNumber: 26, stage: 'group', groupName: 'C', matchday: 2, homeTeam: 'Brazil',   awayTeam: 'Haiti',    matchDate: '2026-06-19T20:30:00-04:00', venue: 'Lincoln Financial Field, Philadelphia', knockoutPlaceholder: false },
-  { matchKey: 'match-17', matchNumber: 53, stage: 'group', groupName: 'C', matchday: 3, homeTeam: 'Scotland', awayTeam: 'Brazil',   matchDate: '2026-06-24T18:00:00-04:00', venue: 'Hard Rock Stadium, Miami',              knockoutPlaceholder: false },
-  { matchKey: 'match-18', matchNumber: 54, stage: 'group', groupName: 'C', matchday: 3, homeTeam: 'Morocco',  awayTeam: 'Haiti',    matchDate: '2026-06-24T18:00:00-04:00', venue: 'Mercedes-Benz Stadium, Atlanta',        knockoutPlaceholder: false },
+  // Group B — Canada (B1), Bosnia and Herzegovina (B2), Qatar (B3), Switzerland (B4)
+  { matchKey: 'match-3',  matchNumber: 3,  stage: 'group', groupName: 'B', matchday: 1, homeTeam: 'Canada',                awayTeam: 'Bosnia and Herzegovina', matchDate: '2026-06-12T19:00:00Z', venue: 'BMO Field, Toronto, Canada',                        knockoutPlaceholder: false },
+  { matchKey: 'match-4',  matchNumber: 4,  stage: 'group', groupName: 'B', matchday: 1, homeTeam: 'Qatar',                 awayTeam: 'Switzerland',            matchDate: '2026-06-13T19:00:00Z', venue: "Levi's Stadium, San Francisco Bay Area, USA",   knockoutPlaceholder: false },
 
-  // Group D — USA, Paraguay, Australia, Türkiye
-  { matchKey: 'match-19', matchNumber: 4,  stage: 'group', groupName: 'D', matchday: 1, homeTeam: 'USA',       awayTeam: 'Paraguay', matchDate: '2026-06-12T18:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',      knockoutPlaceholder: false },
-  { matchKey: 'match-20', matchNumber: 6,  stage: 'group', groupName: 'D', matchday: 1, homeTeam: 'Australia', awayTeam: 'Türkiye',  matchDate: '2026-06-13T21:00:00-07:00', venue: 'BC Place, Vancouver',               knockoutPlaceholder: false },
-  { matchKey: 'match-21', matchNumber: 27, stage: 'group', groupName: 'D', matchday: 2, homeTeam: 'Türkiye',   awayTeam: 'Paraguay', matchDate: '2026-06-19T20:00:00-07:00', venue: 'Levi\'s Stadium, Santa Clara',  knockoutPlaceholder: false },
-  { matchKey: 'match-22', matchNumber: 28, stage: 'group', groupName: 'D', matchday: 2, homeTeam: 'USA',       awayTeam: 'Australia', matchDate: '2026-06-19T12:00:00-07:00', venue: 'Lumen Field, Seattle',           knockoutPlaceholder: false },
-  { matchKey: 'match-23', matchNumber: 65, stage: 'group', groupName: 'D', matchday: 3, homeTeam: 'Türkiye',   awayTeam: 'USA',       matchDate: '2026-06-25T19:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',          knockoutPlaceholder: false },
-  { matchKey: 'match-24', matchNumber: 66, stage: 'group', groupName: 'D', matchday: 3, homeTeam: 'Paraguay',  awayTeam: 'Australia', matchDate: '2026-06-25T19:00:00-07:00', venue: 'Levi\'s Stadium, Santa Clara',  knockoutPlaceholder: false },
+  // Group C — Haiti (C1), Scotland (C2), Brazil (C3), Morocco (C4)
+  { matchKey: 'match-5',  matchNumber: 5,  stage: 'group', groupName: 'C', matchday: 1, homeTeam: 'Brazil',               awayTeam: 'Morocco',                matchDate: '2026-06-13T22:00:00Z', venue: 'MetLife Stadium, New York/New Jersey, USA',       knockoutPlaceholder: false },
+  { matchKey: 'match-6',  matchNumber: 6,  stage: 'group', groupName: 'C', matchday: 1, homeTeam: 'Haiti',                awayTeam: 'Scotland',               matchDate: '2026-06-14T01:00:00Z', venue: 'Gillette Stadium, Boston, USA',                   knockoutPlaceholder: false },
 
-  // Group E — Côte d'Ivoire, Ecuador, Germany, Curaçao
-  { matchKey: 'match-25', matchNumber: 9,  stage: 'group', groupName: 'E', matchday: 1, homeTeam: 'Germany',        awayTeam: 'Curaçao',        matchDate: '2026-06-14T12:00:00-05:00', venue: 'NRG Stadium, Houston',                    knockoutPlaceholder: false },
-  { matchKey: 'match-26', matchNumber: 10, stage: 'group', groupName: 'E', matchday: 1, homeTeam: 'Côte d\'Ivoire', awayTeam: 'Ecuador',        matchDate: '2026-06-14T19:00:00-04:00', venue: 'Lincoln Financial Field, Philadelphia',  knockoutPlaceholder: false },
-  { matchKey: 'match-27', matchNumber: 29, stage: 'group', groupName: 'E', matchday: 2, homeTeam: 'Germany',        awayTeam: 'Côte d\'Ivoire', matchDate: '2026-06-20T16:00:00-04:00', venue: 'BMO Field, Toronto',                     knockoutPlaceholder: false },
-  { matchKey: 'match-28', matchNumber: 30, stage: 'group', groupName: 'E', matchday: 2, homeTeam: 'Ecuador',        awayTeam: 'Curaçao',        matchDate: '2026-06-20T19:00:00-05:00', venue: 'GEHA Field at Arrowhead Stadium, Kansas City', knockoutPlaceholder: false },
-  { matchKey: 'match-29', matchNumber: 59, stage: 'group', groupName: 'E', matchday: 3, homeTeam: 'Curaçao',        awayTeam: 'Côte d\'Ivoire', matchDate: '2026-06-25T16:00:00-04:00', venue: 'Lincoln Financial Field, Philadelphia',  knockoutPlaceholder: false },
-  { matchKey: 'match-30', matchNumber: 60, stage: 'group', groupName: 'E', matchday: 3, homeTeam: 'Ecuador',        awayTeam: 'Germany',        matchDate: '2026-06-25T16:00:00-04:00', venue: 'MetLife Stadium, East Rutherford',           knockoutPlaceholder: false },
+  // Group D — United States (D1), Paraguay (D2), Australia (D3), Türkiye (D4)
+  { matchKey: 'match-7',  matchNumber: 7,  stage: 'group', groupName: 'D', matchday: 1, homeTeam: 'United States',        awayTeam: 'Paraguay',               matchDate: '2026-06-13T01:00:00Z', venue: 'SoFi Stadium, Los Angeles, USA',                  knockoutPlaceholder: false },
+  { matchKey: 'match-8',  matchNumber: 8,  stage: 'group', groupName: 'D', matchday: 1, homeTeam: 'Australia',            awayTeam: 'Türkiye',                matchDate: '2026-06-14T04:00:00Z', venue: 'BC Place, Vancouver, Canada',                      knockoutPlaceholder: false },
 
-  // Group F — Netherlands, Japan, Sweden, Tunisia
-  { matchKey: 'match-31', matchNumber: 11, stage: 'group', groupName: 'F', matchday: 1, homeTeam: 'Netherlands', awayTeam: 'Japan',    matchDate: '2026-06-14T15:00:00-05:00', venue: 'AT&T Stadium, Dallas',                     knockoutPlaceholder: false },
-  { matchKey: 'match-32', matchNumber: 12, stage: 'group', groupName: 'F', matchday: 1, homeTeam: 'Sweden',      awayTeam: 'Tunisia',   matchDate: '2026-06-14T20:00:00-06:00', venue: 'Estadio BBVA',                            knockoutPlaceholder: false },
-  { matchKey: 'match-33', matchNumber: 31, stage: 'group', groupName: 'F', matchday: 2, homeTeam: 'Netherlands', awayTeam: 'Sweden',    matchDate: '2026-06-20T12:00:00-05:00', venue: 'NRG Stadium, Houston',                      knockoutPlaceholder: false },
-  { matchKey: 'match-34', matchNumber: 32, stage: 'group', groupName: 'F', matchday: 2, homeTeam: 'Tunisia',     awayTeam: 'Japan',      matchDate: '2026-06-20T22:00:00-06:00', venue: 'Estadio BBVA',                            knockoutPlaceholder: false },
-  { matchKey: 'match-35', matchNumber: 63, stage: 'group', groupName: 'F', matchday: 3, homeTeam: 'Japan',       awayTeam: 'Sweden',     matchDate: '2026-06-25T18:00:00-05:00', venue: 'AT&T Stadium, Dallas',                     knockoutPlaceholder: false },
-  { matchKey: 'match-36', matchNumber: 64, stage: 'group', groupName: 'F', matchday: 3, homeTeam: 'Tunisia',     awayTeam: 'Netherlands', matchDate: '2026-06-25T18:00:00-05:00', venue: 'GEHA Field at Arrowhead Stadium, Kansas City', knockoutPlaceholder: false },
+  // Group E — Ivory Coast (E1), Ecuador (E2), Germany (E3), Curaçao (E4)
+  { matchKey: 'match-9',  matchNumber: 9,  stage: 'group', groupName: 'E', matchday: 1, homeTeam: 'Germany',              awayTeam: 'Curaçao',                matchDate: '2026-06-14T17:00:00Z', venue: 'NRG Stadium, Houston, USA',                        knockoutPlaceholder: false },
+  { matchKey: 'match-10', matchNumber: 10, stage: 'group', groupName: 'E', matchday: 1, homeTeam: 'Ivory Coast',          awayTeam: 'Ecuador',                matchDate: '2026-06-14T23:00:00Z', venue: 'Lincoln Financial Field, Philadelphia, USA',      knockoutPlaceholder: false },
 
-  // Group G — IR Iran, New Zealand, Belgium, Egypt
-  { matchKey: 'match-37', matchNumber: 15, stage: 'group', groupName: 'G', matchday: 1, homeTeam: 'Belgium',    awayTeam: 'Egypt',       matchDate: '2026-06-15T12:00:00-07:00', venue: 'Lumen Field, Seattle',                   knockoutPlaceholder: false },
-  { matchKey: 'match-38', matchNumber: 16, stage: 'group', groupName: 'G', matchday: 1, homeTeam: 'IR Iran',    awayTeam: 'New Zealand', matchDate: '2026-06-15T18:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',             knockoutPlaceholder: false },
-  { matchKey: 'match-39', matchNumber: 35, stage: 'group', groupName: 'G', matchday: 2, homeTeam: 'Belgium',    awayTeam: 'IR Iran',     matchDate: '2026-06-21T12:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',               knockoutPlaceholder: false },
-  { matchKey: 'match-40', matchNumber: 36, stage: 'group', groupName: 'G', matchday: 2, homeTeam: 'New Zealand', awayTeam: 'Egypt',      matchDate: '2026-06-21T18:00:00-07:00', venue: 'BC Place, Vancouver',                      knockoutPlaceholder: false },
-  { matchKey: 'match-41', matchNumber: 69, stage: 'group', groupName: 'G', matchday: 3, homeTeam: 'Egypt',      awayTeam: 'IR Iran',     matchDate: '2026-06-26T20:00:00-07:00', venue: 'Lumen Field, Seattle',                    knockoutPlaceholder: false },
-  { matchKey: 'match-42', matchNumber: 70, stage: 'group', groupName: 'G', matchday: 3, homeTeam: 'New Zealand', awayTeam: 'Belgium',    matchDate: '2026-06-26T20:00:00-07:00', venue: 'BC Place, Vancouver',                      knockoutPlaceholder: false },
+  // Group F — Netherlands (F1), Japan (F2), Sweden (F3), Tunisia (F4)
+  { matchKey: 'match-11', matchNumber: 11, stage: 'group', groupName: 'F', matchday: 1, homeTeam: 'Netherlands',          awayTeam: 'Japan',                  matchDate: '2026-06-14T20:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                        knockoutPlaceholder: false },
+  { matchKey: 'match-12', matchNumber: 12, stage: 'group', groupName: 'F', matchday: 1, homeTeam: 'Sweden',               awayTeam: 'Tunisia',                matchDate: '2026-06-15T02:00:00Z', venue: 'Estadio BBVA, Monterrey, Mexico',                   knockoutPlaceholder: false },
 
-  // Group H — Saudi Arabia, Uruguay, Spain, Cabo Verde
-  { matchKey: 'match-43', matchNumber: 13, stage: 'group', groupName: 'H', matchday: 1, homeTeam: 'Spain',        awayTeam: 'Cabo Verde',   matchDate: '2026-06-15T12:00:00-04:00', venue: 'Mercedes-Benz Stadium, Atlanta',       knockoutPlaceholder: false },
-  { matchKey: 'match-44', matchNumber: 14, stage: 'group', groupName: 'H', matchday: 1, homeTeam: 'Saudi Arabia', awayTeam: 'Uruguay',      matchDate: '2026-06-15T18:00:00-04:00', venue: 'Hard Rock Stadium, Miami',               knockoutPlaceholder: false },
-  { matchKey: 'match-45', matchNumber: 33, stage: 'group', groupName: 'H', matchday: 2, homeTeam: 'Spain',        awayTeam: 'Saudi Arabia', matchDate: '2026-06-21T12:00:00-04:00', venue: 'Mercedes-Benz Stadium, Atlanta',       knockoutPlaceholder: false },
-  { matchKey: 'match-46', matchNumber: 34, stage: 'group', groupName: 'H', matchday: 2, homeTeam: 'Uruguay',      awayTeam: 'Cabo Verde',   matchDate: '2026-06-21T18:00:00-04:00', venue: 'Hard Rock Stadium, Miami',             knockoutPlaceholder: false },
-  { matchKey: 'match-47', matchNumber: 71, stage: 'group', groupName: 'H', matchday: 3, homeTeam: 'Cabo Verde',    awayTeam: 'Saudi Arabia', matchDate: '2026-06-26T19:00:00-05:00', venue: 'NRG Stadium, Houston',                   knockoutPlaceholder: false },
-  { matchKey: 'match-48', matchNumber: 72, stage: 'group', groupName: 'H', matchday: 3, homeTeam: 'Uruguay',      awayTeam: 'Spain',        matchDate: '2026-06-26T18:00:00-06:00', venue: 'Estadio Akron',                          knockoutPlaceholder: false },
+  // Group G — Belgium (G1), Egypt (G2), Iran (G3), New Zealand (G4)
+  { matchKey: 'match-13', matchNumber: 13, stage: 'group', groupName: 'G', matchday: 1, homeTeam: 'Belgium',              awayTeam: 'Egypt',                  matchDate: '2026-06-15T19:00:00Z', venue: 'Lumen Field, Seattle, USA',                         knockoutPlaceholder: false },
+  { matchKey: 'match-14', matchNumber: 14, stage: 'group', groupName: 'G', matchday: 1, homeTeam: 'Iran',                 awayTeam: 'New Zealand',            matchDate: '2026-06-16T01:00:00Z', venue: 'SoFi Stadium, Los Angeles, USA',                    knockoutPlaceholder: false },
 
-  // Group I — France, Senegal, Iraq, Norway
-  { matchKey: 'match-49', matchNumber: 41, stage: 'group', groupName: 'I', matchday: 1, homeTeam: 'France',  awayTeam: 'Senegal', matchDate: '2026-06-16T15:00:00-04:00', venue: 'MetLife Stadium, East Rutherford',      knockoutPlaceholder: false },
-  { matchKey: 'match-50', matchNumber: 42, stage: 'group', groupName: 'I', matchday: 1, homeTeam: 'Iraq',    awayTeam: 'Norway',  matchDate: '2026-06-16T18:00:00-04:00', venue: 'Gillette Stadium, Foxborough',           knockoutPlaceholder: false },
-  { matchKey: 'match-51', matchNumber: 45, stage: 'group', groupName: 'I', matchday: 2, homeTeam: 'France',  awayTeam: 'Iraq',    matchDate: '2026-06-22T17:00:00-04:00', venue: 'Lincoln Financial Field, Philadelphia',   knockoutPlaceholder: false },
-  { matchKey: 'match-52', matchNumber: 46, stage: 'group', groupName: 'I', matchday: 2, homeTeam: 'Norway',  awayTeam: 'Senegal', matchDate: '2026-06-22T20:00:00-04:00', venue: 'MetLife Stadium, East Rutherford',      knockoutPlaceholder: false },
-  { matchKey: 'match-53', matchNumber: 67, stage: 'group', groupName: 'I', matchday: 3, homeTeam: 'Norway',  awayTeam: 'France',  matchDate: '2026-06-26T15:00:00-04:00', venue: 'Gillette Stadium, Foxborough',            knockoutPlaceholder: false },
-  { matchKey: 'match-54', matchNumber: 68, stage: 'group', groupName: 'I', matchday: 3, homeTeam: 'Senegal', awayTeam: 'Iraq',    matchDate: '2026-06-26T15:00:00-04:00', venue: 'BMO Field, Toronto',                        knockoutPlaceholder: false },
+  // Group H — Spain (H1), Cape Verde (H2), Saudi Arabia (H3), Uruguay (H4)
+  { matchKey: 'match-15', matchNumber: 15, stage: 'group', groupName: 'H', matchday: 1, homeTeam: 'Spain',                awayTeam: 'Cape Verde',             matchDate: '2026-06-15T16:00:00Z', venue: 'Mercedes-Benz Stadium, Atlanta, USA',               knockoutPlaceholder: false },
+  { matchKey: 'match-16', matchNumber: 16, stage: 'group', groupName: 'H', matchday: 1, homeTeam: 'Saudi Arabia',         awayTeam: 'Uruguay',                matchDate: '2026-06-15T22:00:00Z', venue: 'Hard Rock Stadium, Miami, USA',                     knockoutPlaceholder: false },
 
-  // Group J — Argentina, Algeria, Austria, Jordan
-  { matchKey: 'match-55', matchNumber: 43, stage: 'group', groupName: 'J', matchday: 1, homeTeam: 'Argentina', awayTeam: 'Algeria', matchDate: '2026-06-16T20:00:00-05:00', venue: 'GEHA Field at Arrowhead Stadium, Kansas City', knockoutPlaceholder: false },
-  { matchKey: 'match-56', matchNumber: 44, stage: 'group', groupName: 'J', matchday: 1, homeTeam: 'Austria',   awayTeam: 'Jordan',   matchDate: '2026-06-16T21:00:00-07:00', venue: 'Levi\'s Stadium, Santa Clara',                  knockoutPlaceholder: false },
-  { matchKey: 'match-57', matchNumber: 47, stage: 'group', groupName: 'J', matchday: 2, homeTeam: 'Argentina', awayTeam: 'Austria',  matchDate: '2026-06-22T12:00:00-05:00', venue: 'AT&T Stadium, Dallas',                            knockoutPlaceholder: false },
-  { matchKey: 'match-58', matchNumber: 48, stage: 'group', groupName: 'J', matchday: 2, homeTeam: 'Jordan',    awayTeam: 'Algeria',  matchDate: '2026-06-22T20:00:00-07:00', venue: 'Levi\'s Stadium, Santa Clara',                  knockoutPlaceholder: false },
-  { matchKey: 'match-59', matchNumber: 77, stage: 'group', groupName: 'J', matchday: 3, homeTeam: 'Algeria',   awayTeam: 'Austria',  matchDate: '2026-06-27T21:00:00-05:00', venue: 'GEHA Field at Arrowhead Stadium, Kansas City',  knockoutPlaceholder: false },
-  { matchKey: 'match-60', matchNumber: 78, stage: 'group', groupName: 'J', matchday: 3, homeTeam: 'Jordan',    awayTeam: 'Argentina', matchDate: '2026-06-27T21:00:00-05:00', venue: 'AT&T Stadium, Dallas',                          knockoutPlaceholder: false },
+  // Group I — France (I1), Senegal (I2), Iraq (I3), Norway (I4)
+  { matchKey: 'match-17', matchNumber: 17, stage: 'group', groupName: 'I', matchday: 1, homeTeam: 'France',               awayTeam: 'Senegal',                matchDate: '2026-06-16T19:00:00Z', venue: 'MetLife Stadium, New York/New Jersey, USA',         knockoutPlaceholder: false },
+  { matchKey: 'match-18', matchNumber: 18, stage: 'group', groupName: 'I', matchday: 1, homeTeam: 'Iraq',                 awayTeam: 'Norway',                 matchDate: '2026-06-16T22:00:00Z', venue: 'Gillette Stadium, Boston, USA',                     knockoutPlaceholder: false },
 
-  // Group K — Portugal, Congo DR, Uzbekistan, Colombia
-  { matchKey: 'match-61', matchNumber: 49, stage: 'group', groupName: 'K', matchday: 1, homeTeam: 'Portugal',    awayTeam: 'Congo DR',    matchDate: '2026-06-17T12:00:00-05:00', venue: 'NRG Stadium, Houston',                      knockoutPlaceholder: false },
-  { matchKey: 'match-62', matchNumber: 50, stage: 'group', groupName: 'K', matchday: 1, homeTeam: 'Uzbekistan',  awayTeam: 'Colombia',    matchDate: '2026-06-17T20:00:00-06:00', venue: 'Estadio Azteca',                          knockoutPlaceholder: false },
-  { matchKey: 'match-63', matchNumber: 51, stage: 'group', groupName: 'K', matchday: 2, homeTeam: 'Portugal',    awayTeam: 'Uzbekistan',  matchDate: '2026-06-23T12:00:00-05:00', venue: 'NRG Stadium, Houston',                      knockoutPlaceholder: false },
-  { matchKey: 'match-64', matchNumber: 52, stage: 'group', groupName: 'K', matchday: 2, homeTeam: 'Colombia',    awayTeam: 'Congo DR',    matchDate: '2026-06-23T20:00:00-06:00', venue: 'Estadio Akron',                          knockoutPlaceholder: false },
-  { matchKey: 'match-65', matchNumber: 79, stage: 'group', groupName: 'K', matchday: 3, homeTeam: 'Colombia',    awayTeam: 'Portugal',    matchDate: '2026-06-27T19:30:00-04:00', venue: 'Hard Rock Stadium, Miami',                   knockoutPlaceholder: false },
-  { matchKey: 'match-66', matchNumber: 80, stage: 'group', groupName: 'K', matchday: 3, homeTeam: 'Congo DR',    awayTeam: 'Uzbekistan',  matchDate: '2026-06-27T19:30:00-04:00', venue: 'Mercedes-Benz Stadium, Atlanta',           knockoutPlaceholder: false },
+  // Group J — Argentina (J1), Algeria (J2), Austria (J3), Jordan (J4)
+  { matchKey: 'match-19', matchNumber: 19, stage: 'group', groupName: 'J', matchday: 1, homeTeam: 'Argentina',            awayTeam: 'Algeria',                matchDate: '2026-06-17T01:00:00Z', venue: 'Arrowhead Stadium, Kansas City, USA',               knockoutPlaceholder: false },
+  { matchKey: 'match-20', matchNumber: 20, stage: 'group', groupName: 'J', matchday: 1, homeTeam: 'Austria',              awayTeam: 'Jordan',                 matchDate: '2026-06-17T04:00:00Z', venue: "Levi's Stadium, San Francisco Bay Area, USA",      knockoutPlaceholder: false },
 
-  // Group L — Ghana, Panama, England, Croatia
-  { matchKey: 'match-67', matchNumber: 37, stage: 'group', groupName: 'L', matchday: 1, homeTeam: 'England', awayTeam: 'Croatia', matchDate: '2026-06-17T15:00:00-05:00', venue: 'AT&T Stadium, Dallas',                 knockoutPlaceholder: false },
-  { matchKey: 'match-68', matchNumber: 38, stage: 'group', groupName: 'L', matchday: 1, homeTeam: 'Ghana',   awayTeam: 'Panama',   matchDate: '2026-06-17T19:00:00-04:00', venue: 'BMO Field, Toronto',                     knockoutPlaceholder: false },
-  { matchKey: 'match-69', matchNumber: 39, stage: 'group', groupName: 'L', matchday: 2, homeTeam: 'England', awayTeam: 'Ghana',    matchDate: '2026-06-23T16:00:00-04:00', venue: 'Gillette Stadium, Foxborough',            knockoutPlaceholder: false },
-  { matchKey: 'match-70', matchNumber: 40, stage: 'group', groupName: 'L', matchday: 2, homeTeam: 'Panama',  awayTeam: 'Croatia',  matchDate: '2026-06-23T19:00:00-04:00', venue: 'BMO Field, Toronto',                     knockoutPlaceholder: false },
-  { matchKey: 'match-71', matchNumber: 75, stage: 'group', groupName: 'L', matchday: 3, homeTeam: 'Panama',  awayTeam: 'England',  matchDate: '2026-06-27T17:00:00-04:00', venue: 'MetLife Stadium, East Rutherford',        knockoutPlaceholder: false },
-  { matchKey: 'match-72', matchNumber: 76, stage: 'group', groupName: 'L', matchday: 3, homeTeam: 'Croatia', awayTeam: 'Ghana',    matchDate: '2026-06-27T17:00:00-04:00', venue: 'Lincoln Financial Field, Philadelphia',   knockoutPlaceholder: false },
+  // Group K — Portugal (K1), DR Congo (K2), Uzbekistan (K3), Colombia (K4)
+  { matchKey: 'match-21', matchNumber: 21, stage: 'group', groupName: 'K', matchday: 1, homeTeam: 'Portugal',             awayTeam: 'DR Congo',               matchDate: '2026-06-17T17:00:00Z', venue: 'NRG Stadium, Houston, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-22', matchNumber: 22, stage: 'group', groupName: 'K', matchday: 1, homeTeam: 'Uzbekistan',           awayTeam: 'Colombia',               matchDate: '2026-06-18T02:00:00Z', venue: 'Estadio Azteca, Mexico City, Mexico',               knockoutPlaceholder: false },
+
+  // Group L — Ghana (L1), Panama (L2), England (L3), Croatia (L4)
+  { matchKey: 'match-23', matchNumber: 23, stage: 'group', groupName: 'L', matchday: 1, homeTeam: 'England',              awayTeam: 'Croatia',                matchDate: '2026-06-17T20:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                          knockoutPlaceholder: false },
+   { matchKey: 'match-24', matchNumber: 24, stage: 'group', groupName: 'L', matchday: 1, homeTeam: 'Ghana',                awayTeam: 'Panama',                 matchDate: '2026-06-17T23:00:00Z', venue: 'BMO Field, Toronto, Canada',                         knockoutPlaceholder: false },
+
+  // ========== MATCHDAY 2 ==========
+
+  // Group A
+  { matchKey: 'match-25', matchNumber: 25, stage: 'group', groupName: 'A', matchday: 2, homeTeam: 'Czechia',              awayTeam: 'South Africa',           matchDate: '2026-06-18T16:00:00Z', venue: 'Mercedes-Benz Stadium, Atlanta, USA',               knockoutPlaceholder: false },
+  { matchKey: 'match-26', matchNumber: 26, stage: 'group', groupName: 'A', matchday: 2, homeTeam: 'Mexico',               awayTeam: 'South Korea',            matchDate: '2026-06-19T01:00:00Z', venue: 'Estadio Akron, Guadalajara, Mexico',                knockoutPlaceholder: false },
+
+  // Group B
+  { matchKey: 'match-27', matchNumber: 27, stage: 'group', groupName: 'B', matchday: 2, homeTeam: 'Switzerland',           awayTeam: 'Bosnia and Herzegovina', matchDate: '2026-06-18T19:00:00Z', venue: 'SoFi Stadium, Los Angeles, USA',                   knockoutPlaceholder: false },
+  { matchKey: 'match-28', matchNumber: 28, stage: 'group', groupName: 'B', matchday: 2, homeTeam: 'Canada',                awayTeam: 'Qatar',                  matchDate: '2026-06-18T22:00:00Z', venue: 'BC Place, Vancouver, Canada',                       knockoutPlaceholder: false },
+
+  // Group C
+  { matchKey: 'match-29', matchNumber: 29, stage: 'group', groupName: 'C', matchday: 2, homeTeam: 'Brazil',               awayTeam: 'Haiti',                  matchDate: '2026-06-20T00:30:00Z', venue: 'Lincoln Financial Field, Philadelphia, USA',        knockoutPlaceholder: false },
+  { matchKey: 'match-30', matchNumber: 30, stage: 'group', groupName: 'C', matchday: 2, homeTeam: 'Scotland',             awayTeam: 'Morocco',                matchDate: '2026-06-19T22:00:00Z', venue: 'Gillette Stadium, Boston, USA',                     knockoutPlaceholder: false },
+
+  // Group D
+  { matchKey: 'match-31', matchNumber: 31, stage: 'group', groupName: 'D', matchday: 2, homeTeam: 'Türkiye',              awayTeam: 'Paraguay',               matchDate: '2026-06-20T03:00:00Z', venue: "Levi's Stadium, San Francisco Bay Area, USA",      knockoutPlaceholder: false },
+  { matchKey: 'match-32', matchNumber: 32, stage: 'group', groupName: 'D', matchday: 2, homeTeam: 'United States',        awayTeam: 'Australia',              matchDate: '2026-06-19T19:00:00Z', venue: 'Lumen Field, Seattle, USA',                         knockoutPlaceholder: false },
+
+  // Group E
+  { matchKey: 'match-33', matchNumber: 33, stage: 'group', groupName: 'E', matchday: 2, homeTeam: 'Germany',              awayTeam: 'Ivory Coast',            matchDate: '2026-06-20T20:00:00Z', venue: 'BMO Field, Toronto, Canada',                        knockoutPlaceholder: false },
+  { matchKey: 'match-34', matchNumber: 34, stage: 'group', groupName: 'E', matchday: 2, homeTeam: 'Ecuador',              awayTeam: 'Curaçao',                matchDate: '2026-06-21T00:00:00Z', venue: 'Arrowhead Stadium, Kansas City, USA',                knockoutPlaceholder: false },
+
+  // Group F
+  { matchKey: 'match-35', matchNumber: 35, stage: 'group', groupName: 'F', matchday: 2, homeTeam: 'Netherlands',          awayTeam: 'Sweden',                 matchDate: '2026-06-20T17:00:00Z', venue: 'NRG Stadium, Houston, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-36', matchNumber: 36, stage: 'group', groupName: 'F', matchday: 2, homeTeam: 'Tunisia',              awayTeam: 'Japan',                  matchDate: '2026-06-21T04:00:00Z', venue: 'Estadio BBVA, Monterrey, Mexico',                    knockoutPlaceholder: false },
+
+  // Group G
+  { matchKey: 'match-37', matchNumber: 37, stage: 'group', groupName: 'G', matchday: 2, homeTeam: 'Belgium',              awayTeam: 'Iran',                   matchDate: '2026-06-21T19:00:00Z', venue: 'SoFi Stadium, Los Angeles, USA',                    knockoutPlaceholder: false },
+  { matchKey: 'match-38', matchNumber: 38, stage: 'group', groupName: 'G', matchday: 2, homeTeam: 'New Zealand',          awayTeam: 'Egypt',                  matchDate: '2026-06-22T01:00:00Z', venue: 'BC Place, Vancouver, Canada',                       knockoutPlaceholder: false },
+
+  // Group H
+  { matchKey: 'match-39', matchNumber: 39, stage: 'group', groupName: 'H', matchday: 2, homeTeam: 'Uruguay',              awayTeam: 'Cape Verde',             matchDate: '2026-06-21T22:00:00Z', venue: 'Hard Rock Stadium, Miami, USA',                      knockoutPlaceholder: false },
+  { matchKey: 'match-40', matchNumber: 40, stage: 'group', groupName: 'H', matchday: 2, homeTeam: 'Spain',                awayTeam: 'Saudi Arabia',           matchDate: '2026-06-21T16:00:00Z', venue: 'Mercedes-Benz Stadium, Atlanta, USA',               knockoutPlaceholder: false },
+
+  // Group I
+   { matchKey: 'match-41', matchNumber: 41, stage: 'group', groupName: 'I', matchday: 2, homeTeam: 'Norway',               awayTeam: 'Senegal',                matchDate: '2026-06-23T00:00:00Z', venue: 'MetLife Stadium, New York/New Jersey, USA',         knockoutPlaceholder: false },
+  { matchKey: 'match-42', matchNumber: 42, stage: 'group', groupName: 'I', matchday: 2, homeTeam: 'France',               awayTeam: 'Iraq',                   matchDate: '2026-06-22T21:00:00Z', venue: 'Lincoln Financial Field, Philadelphia, USA',        knockoutPlaceholder: false },
+
+  // Group J
+  { matchKey: 'match-43', matchNumber: 43, stage: 'group', groupName: 'J', matchday: 2, homeTeam: 'Argentina',            awayTeam: 'Austria',                matchDate: '2026-06-22T17:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                          knockoutPlaceholder: false },
+   { matchKey: 'match-44', matchNumber: 44, stage: 'group', groupName: 'J', matchday: 2, homeTeam: 'Jordan',               awayTeam: 'Algeria',                matchDate: '2026-06-24T03:00:00Z', venue: "Levi's Stadium, San Francisco Bay Area, USA",      knockoutPlaceholder: false },
+
+  // Group K
+  { matchKey: 'match-45', matchNumber: 45, stage: 'group', groupName: 'K', matchday: 2, homeTeam: 'Portugal',             awayTeam: 'Uzbekistan',             matchDate: '2026-06-23T17:00:00Z', venue: 'NRG Stadium, Houston, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-46', matchNumber: 46, stage: 'group', groupName: 'K', matchday: 2, homeTeam: 'Colombia',             awayTeam: 'DR Congo',               matchDate: '2026-06-24T02:00:00Z', venue: 'Estadio Akron, Guadalajara, Mexico',                knockoutPlaceholder: false },
+
+  // Group L
+  { matchKey: 'match-47', matchNumber: 47, stage: 'group', groupName: 'L', matchday: 2, homeTeam: 'England',              awayTeam: 'Ghana',                  matchDate: '2026-06-23T20:00:00Z', venue: 'Gillette Stadium, Boston, USA',                     knockoutPlaceholder: false },
+  { matchKey: 'match-48', matchNumber: 48, stage: 'group', groupName: 'L', matchday: 2, homeTeam: 'Panama',               awayTeam: 'Croatia',                matchDate: '2026-06-23T23:00:00Z', venue: 'BMO Field, Toronto, Canada',                         knockoutPlaceholder: false },
+
+  // ========== MATCHDAY 3 ==========
+
+  // Group A
+  { matchKey: 'match-49', matchNumber: 49, stage: 'group', groupName: 'A', matchday: 3, homeTeam: 'Czechia',              awayTeam: 'Mexico',                 matchDate: '2026-06-25T01:00:00Z', venue: 'Estadio Azteca, Mexico City, Mexico',               knockoutPlaceholder: false },
+  { matchKey: 'match-50', matchNumber: 50, stage: 'group', groupName: 'A', matchday: 3, homeTeam: 'South Africa',         awayTeam: 'South Korea',            matchDate: '2026-06-25T01:00:00Z', venue: 'Estadio BBVA, Monterrey, Mexico',                   knockoutPlaceholder: false },
+
+  // Group B
+  { matchKey: 'match-51', matchNumber: 51, stage: 'group', groupName: 'B', matchday: 3, homeTeam: 'Switzerland',          awayTeam: 'Canada',                 matchDate: '2026-06-24T19:00:00Z', venue: 'BC Place, Vancouver, Canada',                       knockoutPlaceholder: false },
+  { matchKey: 'match-52', matchNumber: 52, stage: 'group', groupName: 'B', matchday: 3, homeTeam: 'Bosnia and Herzegovina', awayTeam: 'Qatar',               matchDate: '2026-06-24T19:00:00Z', venue: 'Lumen Field, Seattle, USA',                         knockoutPlaceholder: false },
+
+  // Group C
+  { matchKey: 'match-53', matchNumber: 53, stage: 'group', groupName: 'C', matchday: 3, homeTeam: 'Scotland',             awayTeam: 'Brazil',                 matchDate: '2026-06-24T22:00:00Z', venue: 'Hard Rock Stadium, Miami, USA',                      knockoutPlaceholder: false },
+  { matchKey: 'match-54', matchNumber: 54, stage: 'group', groupName: 'C', matchday: 3, homeTeam: 'Morocco',              awayTeam: 'Haiti',                  matchDate: '2026-06-24T22:00:00Z', venue: 'Mercedes-Benz Stadium, Atlanta, USA',               knockoutPlaceholder: false },
+
+  // Group D
+  { matchKey: 'match-55', matchNumber: 55, stage: 'group', groupName: 'D', matchday: 3, homeTeam: 'Türkiye',              awayTeam: 'United States',          matchDate: '2026-06-26T02:00:00Z', venue: 'SoFi Stadium, Los Angeles, USA',                    knockoutPlaceholder: false },
+  { matchKey: 'match-56', matchNumber: 56, stage: 'group', groupName: 'D', matchday: 3, homeTeam: 'Paraguay',             awayTeam: 'Australia',              matchDate: '2026-06-26T02:00:00Z', venue: "Levi's Stadium, San Francisco Bay Area, USA",      knockoutPlaceholder: false },
+
+  // Group E
+  { matchKey: 'match-57', matchNumber: 57, stage: 'group', groupName: 'E', matchday: 3, homeTeam: 'Curaçao',              awayTeam: 'Ivory Coast',            matchDate: '2026-06-25T20:00:00Z', venue: 'Lincoln Financial Field, Philadelphia, USA',        knockoutPlaceholder: false },
+  { matchKey: 'match-58', matchNumber: 58, stage: 'group', groupName: 'E', matchday: 3, homeTeam: 'Ecuador',              awayTeam: 'Germany',                matchDate: '2026-06-25T20:00:00Z', venue: 'MetLife Stadium, New York/New Jersey, USA',         knockoutPlaceholder: false },
+
+  // Group F
+  { matchKey: 'match-59', matchNumber: 59, stage: 'group', groupName: 'F', matchday: 3, homeTeam: 'Japan',                awayTeam: 'Sweden',                 matchDate: '2026-06-25T23:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-60', matchNumber: 60, stage: 'group', groupName: 'F', matchday: 3, homeTeam: 'Tunisia',              awayTeam: 'Netherlands',            matchDate: '2026-06-25T23:00:00Z', venue: 'Arrowhead Stadium, Kansas City, USA',                knockoutPlaceholder: false },
+
+  // Group G
+  { matchKey: 'match-61', matchNumber: 61, stage: 'group', groupName: 'G', matchday: 3, homeTeam: 'New Zealand',          awayTeam: 'Belgium',                matchDate: '2026-06-27T03:00:00Z', venue: 'Lumen Field, Seattle, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-62', matchNumber: 62, stage: 'group', groupName: 'G', matchday: 3, homeTeam: 'Egypt',                awayTeam: 'Iran',                   matchDate: '2026-06-27T03:00:00Z', venue: 'BC Place, Vancouver, Canada',                        knockoutPlaceholder: false },
+
+  // Group H
+  { matchKey: 'match-63', matchNumber: 63, stage: 'group', groupName: 'H', matchday: 3, homeTeam: 'Uruguay',              awayTeam: 'Spain',                  matchDate: '2026-06-27T00:00:00Z', venue: 'Hard Rock Stadium, Miami, USA',                      knockoutPlaceholder: false },
+  { matchKey: 'match-64', matchNumber: 64, stage: 'group', groupName: 'H', matchday: 3, homeTeam: 'Cape Verde',           awayTeam: 'Saudi Arabia',           matchDate: '2026-06-27T00:00:00Z', venue: 'NRG Stadium, Houston, USA',                          knockoutPlaceholder: false },
+
+  // Group I
+  { matchKey: 'match-65', matchNumber: 65, stage: 'group', groupName: 'I', matchday: 3, homeTeam: 'Norway',               awayTeam: 'France',                 matchDate: '2026-06-26T19:00:00Z', venue: 'Gillette Stadium, Boston, USA',                      knockoutPlaceholder: false },
+  { matchKey: 'match-66', matchNumber: 66, stage: 'group', groupName: 'I', matchday: 3, homeTeam: 'Senegal',              awayTeam: 'Iraq',                   matchDate: '2026-06-26T19:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                          knockoutPlaceholder: false },
+
+  // Group J (schedule match 69-70)
+  { matchKey: 'match-67', matchNumber: 69, stage: 'group', groupName: 'J', matchday: 3, homeTeam: 'Jordan',               awayTeam: 'Argentina',              matchDate: '2026-06-28T02:00:00Z', venue: 'AT&T Stadium, Dallas, USA',                          knockoutPlaceholder: false },
+  { matchKey: 'match-68', matchNumber: 70, stage: 'group', groupName: 'J', matchday: 3, homeTeam: 'Algeria',              awayTeam: 'Austria',                matchDate: '2026-06-28T02:00:00Z', venue: 'GEHA Field at Arrowhead Stadium, Kansas City, USA', knockoutPlaceholder: false },
+
+  // Group K (schedule match 67-68)
+  { matchKey: 'match-69', matchNumber: 67, stage: 'group', groupName: 'K', matchday: 3, homeTeam: 'Colombia',             awayTeam: 'Portugal',               matchDate: '2026-06-27T23:30:00Z', venue: 'Hard Rock Stadium, Miami, USA',                      knockoutPlaceholder: false },
+  { matchKey: 'match-70', matchNumber: 68, stage: 'group', groupName: 'K', matchday: 3, homeTeam: 'DR Congo',             awayTeam: 'Uzbekistan',             matchDate: '2026-06-27T23:30:00Z', venue: 'Mercedes-Benz Stadium, Atlanta, USA',                knockoutPlaceholder: false },
+
+  // Group L
+  { matchKey: 'match-71', matchNumber: 71, stage: 'group', groupName: 'L', matchday: 3, homeTeam: 'Panama',               awayTeam: 'England',                matchDate: '2026-06-28T01:00:00Z', venue: 'Lincoln Financial Field, Philadelphia, USA',        knockoutPlaceholder: false },
+  { matchKey: 'match-72', matchNumber: 72, stage: 'group', groupName: 'L', matchday: 3, homeTeam: 'Croatia',              awayTeam: 'Ghana',                  matchDate: '2026-06-28T01:00:00Z', venue: 'BMO Field, Toronto, Canada',                         knockoutPlaceholder: false },
 
   // ========== ROUND OF 32 ==========
   { matchKey: 'match-73', matchNumber: 73, stage: 'roundOf32', groupName: null, matchday: null, homeTeam: 'Runner-up A',       awayTeam: 'Runner-up B',         matchDate: '2026-06-28T12:00:00-07:00', venue: 'SoFi Stadium, Los Angeles',              knockoutPlaceholder: true },
@@ -160,7 +214,7 @@ export const PODIUM_LOCK_DATE = '2026-06-10T22:59:00Z';
 export const GROUP_STAGE_END_DATE = '2026-06-28T00:00:00Z';
 
 export const PODIUM_POINTS = { first: 100, second: 50, third: 25 };
-export const PODIUM_TRIPLE_MULTIPLIER = 3;
+
 
 export const POINTS_EXACT_SCORE = 5;
 export const POINTS_CORRECT_OUTCOME = 2;
@@ -169,9 +223,9 @@ export const POINTS_WRONG = 0;
 export const WILD_CARD_MULTIPLIER = 5;
 
 export const GROUP_ROUND_DATES = [
-  { round: 1, label: 'Fixture 1', startDate: '2026-06-11', endDate: '2026-06-17' },
-  { round: 2, label: 'Fixture 2', startDate: '2026-06-18', endDate: '2026-06-23' },
-  { round: 3, label: 'Fixture 3', startDate: '2026-06-24', endDate: '2026-06-27' },
+  { round: 1, label: 'Fixture 1', startDate: '2026-06-11', endDate: '2026-06-18' },
+  { round: 2, label: 'Fixture 2', startDate: '2026-06-19', endDate: '2026-06-24' },
+  { round: 3, label: 'Fixture 3', startDate: '2026-06-25', endDate: '2026-06-28' },
 ];
 
 export function getCurrentRound() {
@@ -204,33 +258,44 @@ export function getMatchDateStr(match) {
   return match.matchDate ? match.matchDate.split('T')[0] : null;
 }
 
+export function getLocalDateStr(isoStr) {
+  return new Date(isoStr).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+}
+
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+export function formatDateShort(isoStr) {
+  const d = new Date(isoStr);
+  return `${DAYS_SHORT[d.getUTCDay()]}, ${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+
+export function formatDateMonthDay(isoStr) {
+  const d = new Date(isoStr);
+  return `${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+
+export function formatDateLong(isoStr) {
+  const d = new Date(isoStr);
+  return `${DAYS_SHORT[d.getUTCDay()]}, ${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
 export function isDateInRound(dateStr, roundIndex) {
   const r = GROUP_ROUND_DATES[roundIndex];
   if (!r) return false;
   return dateStr >= r.startDate && dateStr <= r.endDate;
 }
 
-export function calculatePodiumPoints(initialPrediction, finalPrediction, actualResults) {
-  if (!actualResults) return { first: 0, second: 0, third: 0, total: 0 };
-  const picks = finalPrediction?.finalizedAt ? finalPrediction : initialPrediction;
-  if (!picks) return { first: 0, second: 0, third: 0, total: 0 };
+export function calculatePodiumPoints(picks, actualResults) {
+  if (!actualResults || !picks) return { first: 0, second: 0, third: 0, total: 0 };
 
   const positions = ['first', 'second', 'third'];
   const breakdown = {};
 
   positions.forEach((pos) => {
-    let pts = 0;
     const pickedTeam = picks[pos];
     const actualTeam = actualResults[pos];
-    if (pickedTeam && pickedTeam === actualTeam) {
-      pts = PODIUM_POINTS[pos];
-      const initialTeam = initialPrediction?.[pos];
-      const finalTeam = finalPrediction?.[pos];
-      if (finalPrediction?.finalizedAt && initialTeam && finalTeam && initialTeam === finalTeam) {
-        pts *= PODIUM_TRIPLE_MULTIPLIER;
-      }
-    }
-    breakdown[pos] = pts;
+    breakdown[pos] = (pickedTeam && pickedTeam === actualTeam) ? PODIUM_POINTS[pos] : 0;
   });
 
   breakdown.total = breakdown.first + breakdown.second + breakdown.third;
@@ -259,7 +324,7 @@ export function calculateExactScorePoints(homeScore, awayScore) {
   return POINTS_EXACT_SCORE + totalGoals + (totalGoals === 0 ? 1 : 0);
 }
 
-export function calculateMatchPoints(prediction, actual, wildCardDay) {
+export function calculateMatchPoints(prediction, actual, matchDate, wildCardDay) {
   if (!prediction || !actual) return 0;
   const pHome = Number(prediction.homeScore);
   const pAway = Number(prediction.awayScore);
@@ -267,13 +332,16 @@ export function calculateMatchPoints(prediction, actual, wildCardDay) {
   const aAway = Number(actual.awayScore);
   if (isNaN(pHome) || isNaN(pAway) || isNaN(aHome) || isNaN(aAway)) return 0;
 
-  if (isExactScore(prediction, actual)) return calculateExactScorePoints(aHome, aAway);
+  let points;
+  if (isExactScore(prediction, actual)) {
+    points = calculateExactScorePoints(aHome, aAway);
+  } else {
+    const predOutcome = deriveOutcome(pHome, pAway);
+    const actualOutcome = deriveOutcome(aHome, aAway);
+    points = predOutcome === actualOutcome ? POINTS_CORRECT_OUTCOME : POINTS_WRONG;
+  }
 
-  const predOutcome = deriveOutcome(pHome, pAway);
-  const actualOutcome = deriveOutcome(aHome, aAway);
-  if (predOutcome === actualOutcome) return POINTS_CORRECT_OUTCOME;
-
-  return POINTS_WRONG;
+  return applyWildCard(points, matchDate, wildCardDay);
 }
 
 export function applyWildCard(points, matchDate, wildCardDay) {
@@ -288,9 +356,7 @@ export function applyWildCard(points, matchDate, wildCardDay) {
 export function getMatchDeadline(iso) {
   if (!iso) return new Date(0);
   const d = new Date(iso);
-  const deadline = new Date(d);
-  deadline.setUTCDate(deadline.getUTCDate() - 1);
-  deadline.setUTCHours(22, 59, 0, 0);
+  const deadline = new Date(d.getTime() - 5 * 60 * 1000);
   return deadline;
 }
 
@@ -321,6 +387,9 @@ export const CITY_COUNTRIES = {
   'Houston': 'USA',
   'Kansas City': 'USA',
   'Dallas': 'USA',
+  'Boston': 'USA',
+  'New York/New Jersey': 'USA',
+  'San Francisco Bay Area': 'USA',
 };
 
 const VENUE_MAP = {
@@ -334,6 +403,7 @@ const VENUE_MAP = {
   'Gillette Stadium': { city: 'Foxborough', country: 'USA' },
   'AT&T Stadium': { city: 'Dallas', country: 'USA' },
   'NRG Stadium': { city: 'Houston', country: 'USA' },
+  'Arrowhead Stadium': { city: 'Kansas City', country: 'USA' },
   'GEHA Field at Arrowhead Stadium': { city: 'Kansas City', country: 'USA' },
   'SoFi Stadium': { city: 'Los Angeles', country: 'USA' },
   'Hard Rock Stadium': { city: 'Miami', country: 'USA' },
@@ -384,21 +454,153 @@ export function formatMatchKickoff(iso) {
 }
 
 export const TEAM_FLAG_CODES = {
-  'Mexico': 'mx', 'South Africa': 'za', 'Korea Republic': 'kr', 'Czechia': 'cz',
+  'Mexico': 'mx', 'South Africa': 'za', 'South Korea': 'kr', 'Korea Republic': 'kr', 'Czechia': 'cz',
   'Canada': 'ca', 'Bosnia and Herzegovina': 'ba', 'Qatar': 'qa', 'Switzerland': 'ch',
   'Haiti': 'ht', 'Scotland': 'gb-sct', 'Brazil': 'br', 'Morocco': 'ma',
-  'USA': 'us', 'Paraguay': 'py', 'Australia': 'au', 'Türkiye': 'tr',
-  "Côte d'Ivoire": 'ci', 'Ecuador': 'ec', 'Germany': 'de', 'Curaçao': 'cw',
+  'United States': 'us', 'USA': 'us', 'Paraguay': 'py', 'Australia': 'au', 'Türkiye': 'tr',
+  'Ivory Coast': 'ci', "Côte d'Ivoire": 'ci', 'Ecuador': 'ec', 'Germany': 'de', 'Curaçao': 'cw',
   'Netherlands': 'nl', 'Japan': 'jp', 'Sweden': 'se', 'Tunisia': 'tn',
-  'IR Iran': 'ir', 'New Zealand': 'nz', 'Belgium': 'be', 'Egypt': 'eg',
-  'Saudi Arabia': 'sa', 'Uruguay': 'uy', 'Spain': 'es', 'Cabo Verde': 'cv',
+  'Iran': 'ir', 'IR Iran': 'ir', 'New Zealand': 'nz', 'Belgium': 'be', 'Egypt': 'eg',
+  'Saudi Arabia': 'sa', 'Uruguay': 'uy', 'Spain': 'es', 'Cape Verde': 'cv', 'Cabo Verde': 'cv',
   'France': 'fr', 'Senegal': 'sn', 'Iraq': 'iq', 'Norway': 'no',
   'Argentina': 'ar', 'Algeria': 'dz', 'Austria': 'at', 'Jordan': 'jo',
-  'Portugal': 'pt', 'Congo DR': 'cd', 'Uzbekistan': 'uz', 'Colombia': 'co',
+  'Portugal': 'pt', 'DR Congo': 'cd', 'Congo DR': 'cd', 'Uzbekistan': 'uz', 'Colombia': 'co',
   'Ghana': 'gh', 'Panama': 'pa', 'England': 'gb-eng', 'Croatia': 'hr',
 };
 
 export function getFlagUrl(teamName) {
   const code = TEAM_FLAG_CODES[teamName];
-  return code ? `https://flagcdn.com/24x18/${code}.png` : null;
+  if (!code) return null;
+  return `https://flagcdn.com/24x18/${code}.png`;
+}
+
+function computeGroupResults(matches) {
+  const result = {};
+  GROUP_NAMES.forEach((g) => {
+    const groupMatches = matches.filter((m) => m.groupName === g);
+    const teams = {};
+    groupMatches.forEach((m) => {
+      const h = m.homeTeam, a = m.awayTeam;
+      if (!teams[h]) teams[h] = { team: h, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
+      if (!teams[a]) teams[a] = { team: a, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
+      const actual = m.actual;
+      if (!actual || actual.homeScore == null) return;
+      const sh = Number(actual.homeScore), sa = Number(actual.awayScore);
+      teams[h].pld++; teams[a].pld++;
+      teams[h].gf += sh; teams[h].ga += sa;
+      teams[a].gf += sa; teams[a].ga += sh;
+      if (sh > sa) { teams[h].w++; teams[h].pts += 3; teams[a].l++; }
+      else if (sh < sa) { teams[a].w++; teams[a].pts += 3; teams[h].l++; }
+      else { teams[h].d++; teams[h].pts++; teams[a].d++; teams[a].pts++; }
+    });
+    const sorted = Object.values(teams).map((t) => ({ ...t, gd: t.gf - t.ga }));
+    sorted.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.team.localeCompare(b.team));
+    result[g] = sorted;
+  });
+  return result;
+}
+
+function resolveThirdPlace(spec, thirdRanked, groupResults) {
+  const candidates = spec.replace('3rd ', '').split('/');
+  const qualified = thirdRanked.filter((t) => t.qualified).map((t) => t.team);
+  const match = candidates.find((g) => {
+    const third = groupResults[g]?.[2];
+    return third && qualified.includes(third.team);
+  });
+  return match ? groupResults[match]?.[2]?.team || null : null;
+}
+
+export function autoPopulateKnockoutBracket(matches) {
+  const groupResults = computeGroupResults(matches);
+
+  // Collect group winners, runners-up, and third-place teams
+  const winners = {};
+  const runnersUp = {};
+  const thirdPlaceTeams = [];
+  GROUP_NAMES.forEach((g) => {
+    const standings = groupResults[g];
+    if (!standings || standings.length < 3) return;
+    if (standings[0]?.team) winners[g] = standings[0].team;
+    if (standings[1]?.team) runnersUp[g] = standings[1].team;
+    if (standings[2]?.team) thirdPlaceTeams.push({ group: g, team: standings[2].team, pts: standings[2].pts, gd: standings[2].gd, gf: standings[2].gf });
+  });
+
+  // Rank third-place teams and mark top 8 as qualified
+  thirdPlaceTeams.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+  const thirdRanked = thirdPlaceTeams.map((t, i) => ({ ...t, qualified: i < 8 }));
+
+  // Build result matching matchKey -> winning team for propagation
+  const matchWinners = {};
+  const updated = matches.map((m) => {
+    if (!m.knockoutPlaceholder) return m;
+    let newHome = m.homeTeam;
+    let newAway = m.awayTeam;
+
+    // Resolve "Winner X" -> group winner
+    const winnerMatch = newHome.match(/^Winner ([A-L])$/);
+    if (winnerMatch) newHome = winners[winnerMatch[1]] || newHome;
+    const winnerMatchAway = newAway.match(/^Winner ([A-L])$/);
+    if (winnerMatchAway) newAway = winners[winnerMatchAway[1]] || newAway;
+
+    // Resolve "Runner-up X" -> group runner-up
+    const ruMatch = newHome.match(/^Runner-up ([A-L])$/);
+    if (ruMatch) newHome = runnersUp[ruMatch[1]] || newHome;
+    const ruMatchAway = newAway.match(/^Runner-up ([A-L])$/);
+    if (ruMatchAway) newAway = runnersUp[ruMatchAway[1]] || newAway;
+
+    // Resolve "3rd X/Y/Z/..."
+    if (newHome.startsWith('3rd ')) newHome = resolveThirdPlace(newHome, thirdRanked, groupResults) || newHome;
+    if (newAway.startsWith('3rd ')) newAway = resolveThirdPlace(newAway, thirdRanked, groupResults) || newAway;
+
+    // Resolve "Winner Match NN" -> winner of earlier knockout match
+    const wmMatch = newHome.match(/^Winner Match (\d+)$/);
+    if (wmMatch) {
+      const prevKey = `match-${wmMatch[1]}`;
+      newHome = matchWinners[prevKey] || newHome;
+    }
+    const wmMatchAway = newAway.match(/^Winner Match (\d+)$/);
+    if (wmMatchAway) {
+      const prevKey = `match-${wmMatchAway[1]}`;
+      newAway = matchWinners[prevKey] || newAway;
+    }
+
+    // Record winner if both teams resolved and actual exists
+    const actual = m.actual;
+    if (actual && actual.homeScore != null && newHome && newAway && newHome !== m.homeTeam && newAway !== m.awayTeam) {
+      const sh = Number(actual.homeScore), sa = Number(actual.awayScore);
+      matchWinners[m.matchKey] = sh > sa ? newHome : sh < sa ? newAway : null;
+    }
+
+    // Only update if at least one slot changed from placeholder
+    if (newHome !== m.homeTeam || newAway !== m.awayTeam) {
+      return { ...m, homeTeam: newHome, awayTeam: newAway };
+    }
+    return m;
+  });
+
+  // Second pass: propagate winners for matches that depend on earlier round results
+  // (matches where both teams are now resolved but weren't in first pass)
+  const finalUpdated = updated.map((m) => {
+    if (!m.knockoutPlaceholder) return m;
+    let newHome = m.homeTeam;
+    let newAway = m.awayTeam;
+
+    const wmMatch = newHome.match(/^Winner Match (\d+)$/);
+    if (wmMatch) {
+      const prevKey = `match-${wmMatch[1]}`;
+      newHome = matchWinners[prevKey] || newHome;
+    }
+    const wmMatchAway = newAway.match(/^Winner Match (\d+)$/);
+    if (wmMatchAway) {
+      const prevKey = `match-${wmMatchAway[1]}`;
+      newAway = matchWinners[prevKey] || newAway;
+    }
+
+    if (newHome !== m.homeTeam || newAway !== m.awayTeam) {
+      return { ...m, homeTeam: newHome, awayTeam: newAway };
+    }
+    return m;
+  });
+
+  return finalUpdated;
 }

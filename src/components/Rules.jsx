@@ -1,4 +1,4 @@
-﻿import { PODIUM_POINTS, PODIUM_TRIPLE_MULTIPLIER, POINTS_EXACT_SCORE, POINTS_CORRECT_OUTCOME, GROUP_STAGE_END_DATE, WILD_CARD_MULTIPLIER } from '../utils/worldCupData.js';
+﻿import { PODIUM_POINTS, POINTS_EXACT_SCORE, POINTS_CORRECT_OUTCOME, GROUP_STAGE_END_DATE, WILD_CARD_MULTIPLIER } from '../utils/worldCupData.js';
 
 const gsd = GROUP_STAGE_END_DATE.split('T')[0];
 
@@ -68,17 +68,17 @@ export default function Rules() {
           </div>
           <div className="rules-podium-split">
             <div className="rules-podium-sub rules-podium-sub--change">
-              <span className="rules-podium-sub-icon">{'\u270F\uFE0F'}</span>
+              <span className="rules-podium-sub-icon">{'\uD83D\uDD12'}</span>
               <div>
-                <strong className="rules-podium-sub-title">Change</strong>
-                <p className="rules-podium-sub-text">Revise your podium picks once after the group stage ends ({gsd}).</p>
+                <strong className="rules-podium-sub-title">Lock on Submit</strong>
+                <p className="rules-podium-sub-text">Your picks lock immediately when you submit them — no editing later.</p>
               </div>
             </div>
             <div className="rules-podium-sub rules-podium-sub--stick">
-              <span className="rules-podium-sub-icon">{'\uD83D\uDCCC'}</span>
+              <span className="rules-podium-sub-icon">{'\uD83C\uDFC6'}</span>
               <div>
-                <strong className="rules-podium-sub-title">Stick</strong>
-                <p className="rules-podium-sub-text">Keep unchanged for the {PODIUM_TRIPLE_MULTIPLIER}\u00D7 bonus!</p>
+                <strong className="rules-podium-sub-title">Fixed Points</strong>
+                <p className="rules-podium-sub-text">Points are awarded at the end of the World Cup: {PODIUM_POINTS.first} / {PODIUM_POINTS.second} / {PODIUM_POINTS.third}.</p>
               </div>
             </div>
           </div>
@@ -102,41 +102,6 @@ export default function Rules() {
                 <span>If you don't activate your Wild Card in a round, it doesn't carry over.</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rules-secondary-grid">
-        <div className="rules-secondary-card panel">
-          <div className="rules-secondary-header">
-            <span className="rules-secondary-icon">{'\uD83D\uDCCB'}</span>
-            <h4 className="rules-secondary-title">Leaderboard</h4>
-          </div>
-          <div className="rules-secondary-body">
-            <p><strong>Total Score</strong> = match prediction points + podium points</p>
-            <p><strong>Tiebreaker:</strong> Podium points decide the winner.</p>
-          </div>
-        </div>
-
-        <div className="rules-secondary-card panel">
-          <div className="rules-secondary-header">
-            <span className="rules-secondary-icon">{'\uD83C\uDFF4'}</span>
-            <h4 className="rules-secondary-title">Teams & Groups</h4>
-          </div>
-          <div className="rules-secondary-body">
-            <p><strong>48 teams</strong> in 12 groups of 4. Top 2 per group + 8 best third-placed teams advance to Round of 32.</p>
-            <p>FIFA world rankings shown on each team card.</p>
-          </div>
-        </div>
-
-        <div className="rules-secondary-card panel">
-          <div className="rules-secondary-header">
-            <span className="rules-secondary-icon">{'\uD83E\uDD1D'}</span>
-            <h4 className="rules-secondary-title">Leagues</h4>
-          </div>
-          <div className="rules-secondary-body">
-            <p><strong>Master League:</strong> Auto-enrolled &mdash; compete against everyone.</p>
-            <p><strong>Private Leagues:</strong> Create with friends via invite link or join code.</p>
           </div>
         </div>
       </div>

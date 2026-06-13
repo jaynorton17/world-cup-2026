@@ -5,12 +5,12 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseAuth } from '../lib/firebase.js';
 import { checkDisplayName } from '../utils/leaguesData.js';
 import { TEAM_NAMES, getTeamData } from '../utils/teamData.js';
-import { PODIUM_LOCK_DATE, GROUP_STAGE_END_DATE, PODIUM_POINTS, PODIUM_TRIPLE_MULTIPLIER, getFlagUrl } from '../utils/worldCupData.js';
+import { GROUP_STAGE_END_DATE, PODIUM_POINTS, getFlagUrl } from '../utils/worldCupData.js';
 
 function FlagImg({ team, size = 18 }) {
   const url = getFlagUrl(team);
   if (!url) return <span className="podium-flag-placeholder" />;
-  return <img className="podium-flag" src={url} alt={team} width={size} height={size * 0.75} loading="lazy" />;
+  return <img className="podium-flag" src={url} alt={team} width={size} height={size * 0.75} loading="lazy" onError={(e) => { e.target.style.display = 'none' }} />;
 }
 
 function TeamDropdown({ value, onChange, teams, placeholder }) {
@@ -51,21 +51,16 @@ const PODIUM_POSITIONS = [
 ];
 
 export default function PodiumPredictionModal({ user, firestore, existingPrediction, groupStageOver, onSave, onDismiss, userDoc }) {
-  const firstInitial = existingPrediction?.initial?.first || existingPrediction?.first || '';
-  const secondInitial = existingPrediction?.initial?.second || existingPrediction?.second || '';
-  const thirdInitial = existingPrediction?.initial?.third || existingPrediction?.third || '';
-  const hasFinal = existingPrediction?.final || existingPrediction?.finalizedAt;
+  const existing = existingPrediction || userDoc || {};
 
-  const currentForDisplay = hasFinal ? existingPrediction.final : { first: firstInitial, second: secondInitial, third: thirdInitial };
-
-  const [first, setFirst] = useState(currentForDisplay?.first || '');
-  const [second, setSecond] = useState(currentForDisplay?.second || '');
-  const [third, setThird] = useState(currentForDisplay?.third || '');
+  const [first, setFirst] = useState(existing.first || '');
+  const [second, setSecond] = useState(existing.second || '');
+  const [third, setThird] = useState(existing.third || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const deadlineTime = useRef(new Date(PODIUM_LOCK_DATE).getTime());
+  const deadlineTime = useRef(new Date(GROUP_STAGE_END_DATE).getTime());
   const calcTimeLeft = () => {
     const diff = deadlineTime.current - Date.now();
     if (diff <= 0) return null;
@@ -93,11 +88,6 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
     if (editingName && nameInputRef.current) nameInputRef.current.focus();
   }, [editingName]);
 
-  const isReEntry = groupStageOver && existingPrediction;
-  const unchanged = firstInitial && first === firstInitial && second === secondInitial && third === thirdInitial;
-
-  const usedTeams = [first, second, third].filter(Boolean);
-
   const availableTeams = (position) => {
     return TEAM_NAMES.filter((t) => {
       if (t === first && position !== 'first') return false;
@@ -120,26 +110,13 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
     setSaving(true);
     try {
       const ref = doc(firestore, 'users', user.uid);
-
-      const existingPP = (userDoc || existingPrediction) || {};
       const podiumPrediction = {
-        ...existingPP,
         first,
         second,
         third,
+        createdAt: existing.createdAt || serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
-
-      if (isReEntry) {
-        podiumPrediction.initial = existingPP.initial || { first, second, third };
-        podiumPrediction.final = { first, second, third };
-        podiumPrediction.finalizedAt = serverTimestamp();
-      } else {
-        podiumPrediction.initial = existingPP.initial || { first, second, third };
-        if (!existingPP.createdAt) {
-          podiumPrediction.createdAt = serverTimestamp();
-        }
-      }
 
       await setDoc(ref, { podiumPrediction }, { merge: true });
       setSaved(true);
@@ -155,7 +132,6 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
   };
 
   const totalPts = PODIUM_POINTS.first + PODIUM_POINTS.second + PODIUM_POINTS.third;
-  const tripleTotal = totalPts * PODIUM_TRIPLE_MULTIPLIER;
   const canSave = first && second && third && !saving && !saved;
 
   const handleNameEdit = () => {
@@ -202,12 +178,10 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
       <div className="panel podium-modal" role="dialog" aria-modal="true" aria-label="Podium prediction" onClick={(e) => e.stopPropagation()}>
         {saved ? (
           <div className="podium-saved">
-            <span className="podium-saved-icon">{isReEntry ? '\u2705' : '\uD83D\uDD12'}</span>
-            <h2 className="podium-saved-title">{isReEntry ? 'Final Picks Saved!' : 'Picks Locked'}</h2>
+            <span className="podium-saved-icon">{'\uD83D\uDD12'}</span>
+            <h2 className="podium-saved-title">Picks Locked</h2>
             <p className="podium-saved-text">
-              {isReEntry
-                ? `Your final podium predictions are locked in.${unchanged ? ' Keeping the same three \u2014 triple points eligible!' : ''}`
-                : 'Your first, second, and third place picks are now locked and cannot be changed until the group stage ends.'}
+              Your podium predictions are saved and locked. No further changes can be made.
             </p>
             <div className="podium-saved-picks">
               {PODIUM_POSITIONS.map((pos) => {
@@ -266,19 +240,10 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
             </div>
 
             <div className="podium-info">
-              {isReEntry ? (
-                <p className="podium-info-text">
-                  The group stage is over! Lock in your <strong>final</strong> podium picks.
-                  {unchanged
-                    ? ' You kept the same three teams — if they match the actual results you get <strong>triple points</strong>!'
-                    : ' If you keep the same picks you had before and they\'re correct, you get <strong>triple points</strong>.'}
-                </p>
-              ) : (
-                <p className="podium-info-text">
-                  Pick who will finish <strong>1st, 2nd, and 3rd</strong>. Points: winner <strong>+{PODIUM_POINTS.first}</strong>, runner-up <strong>+{PODIUM_POINTS.second}</strong>, third <strong>+{PODIUM_POINTS.third}</strong>.
-                  Keep the same picks after the group stage and get <strong>×{PODIUM_TRIPLE_MULTIPLIER}</strong> (up to {tripleTotal} pts!).
-                </p>
-              )}
+              <p className="podium-info-text">
+                Pick who will finish <strong>1st, 2nd, and 3rd</strong>. Points: winner <strong>+{PODIUM_POINTS.first}</strong>, runner-up <strong>+{PODIUM_POINTS.second}</strong>, third <strong>+{PODIUM_POINTS.third}</strong>.
+                Your picks lock immediately when you submit and cannot be changed.
+              </p>
             </div>
 
             <div className="podium-name-section">
@@ -338,12 +303,11 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
 
             <div className="podium-points-summary">
               <span>Max if correct: <strong>+{totalPts} pts</strong></span>
-              <span className="podium-points-triple">Triple if kept: <strong>+{tripleTotal} pts</strong></span>
             </div>
 
             <div className="podium-deadline">
               {timeLeft ? (
-                <span>{'\u23F0'} Locks Jun 10, 11:59 PM BST \u00B7 Closes in {timeLeft.days > 0 ? timeLeft.days + 'd ' : ''}{timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s</span>
+                <span>{'\u23F0'} Locks {new Date(GROUP_STAGE_END_DATE).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' })} \u00B7 Closes in {timeLeft.days > 0 ? timeLeft.days + 'd ' : ''}{timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s</span>
               ) : (
                 <span>{'\uD83D\uDD12'} Podium locked</span>
               )}
@@ -356,7 +320,7 @@ export default function PodiumPredictionModal({ user, firestore, existingPredict
                 {existingPrediction ? 'Cancel' : 'Skip for now'}
               </button>
               <button type="button" className="podium-save-btn" onClick={handleSubmit} disabled={!canSave}>
-                {saving ? 'Saving...' : isReEntry ? 'Lock in Final Picks' : 'Save Prediction'}
+                {saving ? 'Saving...' : 'Save Prediction'}
               </button>
             </div>
           </>
