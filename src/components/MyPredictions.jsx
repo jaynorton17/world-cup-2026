@@ -209,7 +209,7 @@ function MyPredictionsInner({ user, firestore, userDoc, onOpenWildCard }) {
     const otherUsers = Object.entries(usersMap).filter(([uid]) => uid !== user?.uid && usersMap[uid]?.podiumPrediction);
     const counts = { first: {}, second: {}, third: {} };
     otherUsers.forEach(([, d]) => {
-      const picks = d.podiumPrediction.final || d.podiumPrediction;
+      const picks = d.podiumPrediction;
       if (picks.first) counts.first[picks.first] = (counts.first[picks.first] || 0) + 1;
       if (picks.second) counts.second[picks.second] = (counts.second[picks.second] || 0) + 1;
       if (picks.third) counts.third[picks.third] = (counts.third[picks.third] || 0) + 1;

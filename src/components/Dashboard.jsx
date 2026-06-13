@@ -259,8 +259,7 @@ export default function Dashboard({ user, firestore, onOpenPodium }) {
       .filter((m) => m.stage === 'group' && !isMatchDeadlinePassed(m.matchDate) && m.actual?.homeScore == null)
       .sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate))
       .slice(0, 3);
-    const pp = data.podiumPrediction;
-    const podium = pp ? (pp.final || pp.initial || null) : null;
+    const podium = data.podiumPrediction || null;
     return { uid: viewPlayerUid, name, pts, predCount, totalGroup, nextThree, podium };
   }, [viewPlayerUid, usersMap, user, matches]);
 
